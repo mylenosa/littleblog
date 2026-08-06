@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ArticleForm } from "@/components/admin/article-form";
+import { AdminBreadcrumb } from "@/components/admin/admin-breadcrumb";
 import { getArticleBySlug } from "@/lib/queries/articles";
 
 export async function generateMetadata(
@@ -21,6 +22,9 @@ export default async function EditarArtigoPage(
 
   return (
     <div>
+      <AdminBreadcrumb
+        items={[{ label: "Artigos", href: "/admin" }, { label: article.title }]}
+      />
       <h1 className="mb-8 text-3xl font-semibold tracking-tight">Editar artigo</h1>
       <ArticleForm
         mode="edit"

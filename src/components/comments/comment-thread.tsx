@@ -9,7 +9,7 @@ function countComments(nodes: Awaited<ReturnType<typeof getCommentsForArticle>>)
 }
 
 export async function CommentThread({ articleSlug }: { articleSlug: string }) {
-  const [comments, { user }] = await Promise.all([
+  const [comments, { user, profile }] = await Promise.all([
     getCommentsForArticle(articleSlug),
     getAuthState(),
   ]);
@@ -45,6 +45,7 @@ export async function CommentThread({ articleSlug }: { articleSlug: string }) {
               comment={comment}
               articleSlug={articleSlug}
               currentUserId={user?.id ?? null}
+              isEditor={!!profile?.isEditor}
             />
           ))}
         </div>

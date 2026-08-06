@@ -2,7 +2,11 @@ import { createClient } from "@/lib/supabase/server";
 
 export type AuthState = {
   user: { id: string; email: string | null } | null;
-  profile: { fullName: string | null; isEditor: boolean } | null;
+  profile: {
+    fullName: string | null;
+    isEditor: boolean;
+    avatarUrl: string | null;
+  } | null;
 };
 
 export async function getAuthState(): Promise<AuthState> {
@@ -15,14 +19,18 @@ export async function getAuthState(): Promise<AuthState> {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, is_editor")
+    .select("full_name, is_editor, avatar_url")
     .eq("id", user.id)
     .single();
 
   return {
     user: { id: user.id, email: user.email ?? null },
     profile: profile
-      ? { fullName: profile.full_name, isEditor: profile.is_editor }
+      ? {
+          fullName: profile.full_name,
+          isEditor: profile.is_editor,
+          avatarUrl: profile.avatar_url,
+        }
       : null,
   };
 }

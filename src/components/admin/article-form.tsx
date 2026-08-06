@@ -1,12 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import ReactMarkdown from "react-markdown";
+import {
+  Bold,
+  Heading2,
+  Italic,
+  Link as LinkIcon,
+  List,
+  Quote,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,13 +34,32 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
+import { ArticleCover } from "@/components/articles/article-cover";
+import { ArticleMeta } from "@/components/articles/article-meta";
+import { TagBadge } from "@/components/articles/tag-badge";
+import { MdxContent } from "@/components/articles/mdx-content";
+import { PresetPicker } from "@/components/common/preset-picker";
+import { ImageDropzone } from "@/components/common/image-dropzone";
+import {
+  isPresetValue,
+  presetIdFromValue,
+  presetValueFromId,
+} from "@/lib/constants/image-presets";
 import {
   articleFormSchema,
+  parseTags,
   type ArticleFormInput,
 } from "@/lib/validations/article-form.schema";
 import { createArticle, deleteArticle, updateArticle } from "@/lib/actions/admin";
 import { createClient } from "@/lib/supabase/client";
 import { slugify } from "@/lib/slugify";
+
+const WORDS_PER_MINUTE = 200;
+
+function estimateReadingTime(content: string) {
+  const words = content.trim().split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(words / WORDS_PER_MINUTE));
+}
 
 export function ArticleForm({
   mode,
@@ -49,20 +74,29 @@ export function ArticleForm({
   const [uploading, setUploading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [slugTouched, setSlugTouched] = useState(mode === "edit");
+  const contentRef = useRef<HTMLTextAreaElement | null>(null);
 
   const {
     register,
     handleSubmit,
     watch,
     setValue,
+    getValues,
     formState: { errors, isSubmitting },
   } = useForm<ArticleFormInput>({
     resolver: zodResolver(articleFormSchema),
     defaultValues,
   });
 
+  const { ref: contentRegisterRef, ...contentField } = register("content");
+
   const coverImageUrl = watch("coverImageUrl");
   const content = watch("content");
+  const title = watch("title");
+  const summary = watch("summary");
+  const authorName = watch("authorName");
+  const publishedAt = watch("publishedAt");
+  const tags = watch("tags");
 
   function handleTitleChange(event: React.ChangeEvent<HTMLInputElement>) {
     if (!slugTouched) {
@@ -70,10 +104,7 @@ export function ArticleForm({
     }
   }
 
-  async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
+  async function uploadCoverFile(file: File) {
     setUploading(true);
     const supabase = createClient();
     const path = `${Date.now()}-${slugify(file.name.replace(/\.[^.]+$/, ""))}`;
@@ -89,8 +120,41 @@ export function ArticleForm({
     }
 
     const { data } = supabase.storage.from("article-covers").getPublicUrl(path);
-    setValue("coverImageUrl", data.publicUrl);
+    setValue("coverImageUrl", data.publicUrl, { shouldDirty: true });
     setUploading(false);
+  }
+
+  function placeCursor(position: number) {
+    requestAnimationFrame(() => {
+      const el = contentRef.current;
+      if (!el) return;
+      el.focus();
+      el.setSelectionRange(position, position);
+    });
+  }
+
+  function wrapSelection(before: string, after: string, placeholder: string) {
+    const el = contentRef.current;
+    const current = getValues("content") || "";
+    const start = el?.selectionStart ?? current.length;
+    const end = el?.selectionEnd ?? current.length;
+    const selected = current.slice(start, end) || placeholder;
+
+    const next =
+      current.slice(0, start) + before + selected + after + current.slice(end);
+    setValue("content", next, { shouldDirty: true });
+    placeCursor(start + before.length + selected.length + after.length);
+  }
+
+  function prefixLine(prefix: string) {
+    const el = contentRef.current;
+    const current = getValues("content") || "";
+    const start = el?.selectionStart ?? current.length;
+    const lineStart = current.lastIndexOf("\n", start - 1) + 1;
+
+    const next = current.slice(0, lineStart) + prefix + current.slice(lineStart);
+    setValue("content", next, { shouldDirty: true });
+    placeCursor(start + prefix.length);
   }
 
   async function onSubmit(data: ArticleFormInput) {
@@ -121,124 +185,245 @@ export function ArticleForm({
     }
   }
 
+  const previewTags = parseTags(tags || "");
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-5">
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="title">Título</Label>
-        <Input
-          id="title"
-          aria-invalid={!!errors.title}
-          {...register("title", { onChange: handleTitleChange })}
-        />
-        {errors.title && (
-          <p className="text-sm text-destructive">{errors.title.message}</p>
-        )}
-      </div>
+      <Tabs defaultValue="editar">
+        <TabsList>
+          <TabsTrigger value="editar">Editar</TabsTrigger>
+          <TabsTrigger value="visualizar">Visualizar artigo</TabsTrigger>
+        </TabsList>
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="slug">Slug</Label>
-        <Input
-          id="slug"
-          aria-invalid={!!errors.slug}
-          {...register("slug", { onChange: () => setSlugTouched(true) })}
-        />
-        {errors.slug && (
-          <p className="text-sm text-destructive">{errors.slug.message}</p>
-        )}
-      </div>
+        <TabsContent value="editar" className="flex flex-col gap-5 pt-4">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="title">Título</Label>
+            <Input
+              id="title"
+              aria-invalid={!!errors.title}
+              {...register("title", { onChange: handleTitleChange })}
+            />
+            {errors.title && (
+              <p className="text-sm text-destructive">{errors.title.message}</p>
+            )}
+          </div>
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="summary">Resumo</Label>
-        <Textarea
-          id="summary"
-          rows={2}
-          aria-invalid={!!errors.summary}
-          {...register("summary")}
-        />
-        {errors.summary && (
-          <p className="text-sm text-destructive">{errors.summary.message}</p>
-        )}
-      </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="slug">Slug (endereço da página)</Label>
+            <Input
+              id="slug"
+              aria-invalid={!!errors.slug}
+              {...register("slug", { onChange: () => setSlugTouched(true) })}
+            />
+            {errors.slug && (
+              <p className="text-sm text-destructive">{errors.slug.message}</p>
+            )}
+          </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="authorName">Autor</Label>
-          <Input
-            id="authorName"
-            aria-invalid={!!errors.authorName}
-            {...register("authorName")}
-          />
-          {errors.authorName && (
-            <p className="text-sm text-destructive">{errors.authorName.message}</p>
-          )}
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="publishedAt">Data de publicação</Label>
-          <Input
-            id="publishedAt"
-            type="date"
-            aria-invalid={!!errors.publishedAt}
-            {...register("publishedAt")}
-          />
-          {errors.publishedAt && (
-            <p className="text-sm text-destructive">{errors.publishedAt.message}</p>
-          )}
-        </div>
-      </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="summary">Resumo</Label>
+            <Textarea
+              id="summary"
+              rows={2}
+              aria-invalid={!!errors.summary}
+              {...register("summary")}
+            />
+            {errors.summary && (
+              <p className="text-sm text-destructive">{errors.summary.message}</p>
+            )}
+          </div>
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="tags">Tags (separadas por vírgula)</Label>
-        <Input id="tags" aria-invalid={!!errors.tags} {...register("tags")} />
-        {errors.tags && (
-          <p className="text-sm text-destructive">{errors.tags.message}</p>
-        )}
-      </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="authorName">Autor</Label>
+              <Input
+                id="authorName"
+                aria-invalid={!!errors.authorName}
+                {...register("authorName")}
+              />
+              {errors.authorName && (
+                <p className="text-sm text-destructive">{errors.authorName.message}</p>
+              )}
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="publishedAt">Data de publicação</Label>
+              <Input
+                id="publishedAt"
+                type="date"
+                aria-invalid={!!errors.publishedAt}
+                {...register("publishedAt")}
+              />
+              {errors.publishedAt && (
+                <p className="text-sm text-destructive">
+                  {errors.publishedAt.message}
+                </p>
+              )}
+            </div>
+          </div>
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="cover">Imagem de capa</Label>
-        <Input id="cover" type="file" accept="image/*" onChange={handleFileChange} />
-        {uploading && (
-          <p className="text-sm text-muted-foreground">Enviando imagem...</p>
-        )}
-        {coverImageUrl && (
-          <div className="relative mt-1 aspect-video w-full max-w-xs overflow-hidden rounded-lg border border-border">
-            <Image
-              src={coverImageUrl}
-              alt="Pré-visualização da capa"
-              fill
-              className="object-cover"
-              unoptimized
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="tags">Tags (separadas por vírgula)</Label>
+            <Input id="tags" aria-invalid={!!errors.tags} {...register("tags")} />
+            {errors.tags && (
+              <p className="text-sm text-destructive">{errors.tags.message}</p>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="cover">Imagem de capa</Label>
+            <div className="max-w-sm">
+              <ImageDropzone
+                uploading={uploading}
+                hasValue={!!coverImageUrl}
+                preview={
+                  <ArticleCover
+                    slug="preview-capa"
+                    src={coverImageUrl}
+                    alt="Pré-visualização da capa"
+                    className="w-full"
+                  />
+                }
+                onFile={uploadCoverFile}
+                onClear={() => setValue("coverImageUrl", "", { shouldDirty: true })}
+              />
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground">
+              Ou escolha uma imagem padrão:
+            </p>
+            <PresetPicker
+              value={coverImageUrl && isPresetValue(coverImageUrl) ? presetIdFromValue(coverImageUrl) : undefined}
+              onSelect={(id) =>
+                setValue("coverImageUrl", presetValueFromId(id), { shouldDirty: true })
+              }
             />
           </div>
-        )}
-      </div>
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="content">Conteúdo (Markdown)</Label>
-        <Tabs defaultValue="editar">
-          <TabsList>
-            <TabsTrigger value="editar">Editar</TabsTrigger>
-            <TabsTrigger value="preview">Preview</TabsTrigger>
-          </TabsList>
-          <TabsContent value="editar">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="content">Conteúdo</Label>
+            <p className="text-xs text-muted-foreground">
+              Use os botões abaixo pra formatar sem precisar saber a sintaxe.
+              Selecione um trecho de texto antes de clicar, se quiser aplicar
+              só nele.
+            </p>
+            <div className="rounded-t-lg border border-b-0 border-input bg-muted/50 shadow-sm">
+              <div className="flex flex-wrap items-center gap-0.5 p-1.5">
+                <div className="flex items-center gap-0.5">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    title="Negrito"
+                    aria-label="Negrito"
+                    onClick={() => wrapSelection("**", "**", "texto em negrito")}
+                  >
+                    <Bold />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    title="Itálico"
+                    aria-label="Itálico"
+                    onClick={() => wrapSelection("_", "_", "texto em itálico")}
+                  >
+                    <Italic />
+                  </Button>
+                </div>
+                <div className="mx-1 h-5 w-px bg-border" aria-hidden="true" />
+                <div className="flex items-center gap-0.5">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    title="Subtítulo"
+                    aria-label="Subtítulo"
+                    onClick={() => prefixLine("## ")}
+                  >
+                    <Heading2 />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    title="Citação"
+                    aria-label="Citação"
+                    onClick={() => prefixLine("> ")}
+                  >
+                    <Quote />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    title="Lista"
+                    aria-label="Lista"
+                    onClick={() => prefixLine("- ")}
+                  >
+                    <List />
+                  </Button>
+                </div>
+                <div className="mx-1 h-5 w-px bg-border" aria-hidden="true" />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  title="Link"
+                  aria-label="Link"
+                  onClick={() => wrapSelection("[", "](https://)", "texto do link")}
+                >
+                  <LinkIcon />
+                </Button>
+              </div>
+            </div>
             <Textarea
               id="content"
               rows={16}
-              className="font-mono text-sm"
+              className="rounded-t-none"
               aria-invalid={!!errors.content}
-              {...register("content")}
+              {...contentField}
+              ref={(el) => {
+                contentRegisterRef(el);
+                contentRef.current = el;
+              }}
             />
-          </TabsContent>
-          <TabsContent value="preview">
-            <div className="prose prose-neutral min-h-40 max-w-none rounded-lg border border-border p-4 dark:prose-invert">
-              <ReactMarkdown>{content || "*Nada para mostrar ainda.*"}</ReactMarkdown>
+            {errors.content && (
+              <p className="text-sm text-destructive">{errors.content.message}</p>
+            )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="visualizar" className="pt-4">
+          <div className="rounded-lg border border-border p-4 sm:p-8">
+            <div className="mx-auto flex max-w-2xl flex-col gap-4">
+              <div className="flex flex-wrap gap-1.5">
+                {previewTags.length > 0 ? (
+                  previewTags.map((tag) => <TagBadge key={tag} tag={tag} />)
+                ) : (
+                  <span className="text-sm text-muted-foreground">Sem tags ainda</span>
+                )}
+              </div>
+              <h1 className="text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">
+                {title || "Título do artigo"}
+              </h1>
+              <p className="text-lg text-muted-foreground">
+                {summary || "O resumo aparece aqui."}
+              </p>
+              <ArticleMeta
+                authorName={authorName || "Autor"}
+                publishedAt={publishedAt || new Date().toISOString().slice(0, 10)}
+                readingTimeMinutes={estimateReadingTime(content || "")}
+              />
+              <ArticleCover
+                slug={originalSlug ?? "preview"}
+                src={coverImageUrl}
+                alt={title}
+                className="my-2"
+              />
+              <MdxContent source={content || "*O conteúdo aparece aqui.*"} />
             </div>
-          </TabsContent>
-        </Tabs>
-        {errors.content && (
-          <p className="text-sm text-destructive">{errors.content.message}</p>
-        )}
-      </div>
+          </div>
+        </TabsContent>
+      </Tabs>
 
       <div className="flex items-center justify-between">
         <Button type="submit" disabled={isSubmitting || uploading}>

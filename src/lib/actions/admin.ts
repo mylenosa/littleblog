@@ -159,6 +159,28 @@ export async function setFeatured(
   return { success: true };
 }
 
+export async function setEditorStatus(
+  targetUserId: string,
+  newIsEditor: boolean
+): Promise<AdminActionResult> {
+  const { supabase, ok } = await requireEditor();
+  if (!ok) {
+    return { success: false, message: "Apenas editores podem fazer isso." };
+  }
+
+  const { error } = await supabase.rpc("admin_set_editor", {
+    target_user_id: targetUserId,
+    new_is_editor: newIsEditor,
+  });
+
+  if (error) {
+    return { success: false, message: "Não foi possível atualizar o usuário." };
+  }
+
+  revalidatePath("/admin/usuarios");
+  return { success: true };
+}
+
 export async function updateFeaturedPosition(
   slug: string,
   position: number

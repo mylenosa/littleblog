@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { Heart, LayoutDashboard, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { PresetVisual } from "@/components/common/preset-visual";
+import { isPresetValue, presetIdFromValue } from "@/lib/constants/image-presets";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -54,9 +56,18 @@ export function UserMenu({ user, profile }: AuthState) {
           />
         }
       >
-        <Avatar className="size-8">
-          <AvatarFallback>{initials(displayName)}</AvatarFallback>
-        </Avatar>
+        {profile?.avatarUrl && isPresetValue(profile.avatarUrl) ? (
+          <PresetVisual
+            presetId={presetIdFromValue(profile.avatarUrl)}
+            shape="circle"
+            className="size-8"
+          />
+        ) : (
+          <Avatar className="size-8">
+            <AvatarImage src={profile?.avatarUrl || undefined} alt="" />
+            <AvatarFallback>{initials(displayName)}</AvatarFallback>
+          </Avatar>
+        )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <div className="truncate px-1.5 py-1 text-xs font-medium text-muted-foreground">

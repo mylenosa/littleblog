@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ArticleForm } from "@/components/admin/article-form";
+import { AdminBreadcrumb } from "@/components/admin/admin-breadcrumb";
 import { getAuthState } from "@/lib/supabase/auth-state";
 
 export const metadata: Metadata = {
@@ -15,6 +16,7 @@ export default async function NovoArtigoPage() {
 
   return (
     <div>
+      <AdminBreadcrumb items={[{ label: "Artigos", href: "/admin" }, { label: "Novo" }]} />
       <h1 className="mb-8 text-3xl font-semibold tracking-tight">Novo artigo</h1>
       <ArticleForm
         mode="create"
