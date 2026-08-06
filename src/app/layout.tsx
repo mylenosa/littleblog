@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Toaster } from "@/components/ui/sonner";
+import { getSiteUrl } from "@/lib/site-url";
 
 const geistSans = Geist({
   variable: "--font-sans",
@@ -17,12 +18,26 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(getSiteUrl()),
   title: {
     default: "Blog de Música e Entretenimento",
     template: "%s | Blog de Música e Entretenimento",
   },
   description:
     "Notícias, shows, festivais, artistas, lançamentos e reviews do universo da música.",
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    title: "Blog de Música e Entretenimento",
+    description:
+      "Notícias, shows, festivais, artistas, lançamentos e reviews do universo da música.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Blog de Música e Entretenimento",
+    description:
+      "Notícias, shows, festivais, artistas, lançamentos e reviews do universo da música.",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
