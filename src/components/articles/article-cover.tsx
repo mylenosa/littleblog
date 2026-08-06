@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Disc3, Music2, Radio, Waves } from "lucide-react";
 
 const ICONS = [Disc3, Music2, Radio, Waves];
@@ -12,11 +13,33 @@ function hashSlug(slug: string) {
 
 export function ArticleCover({
   slug,
+  src,
+  alt,
   className,
 }: {
   slug: string;
+  src?: string | null;
+  alt?: string;
   className?: string;
 }) {
+  if (src) {
+    return (
+      <div
+        className={`relative aspect-video overflow-hidden rounded-lg bg-secondary ${
+          className ?? ""
+        }`}
+      >
+        <Image
+          src={src}
+          alt={alt ?? ""}
+          fill
+          className="object-cover"
+          sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+        />
+      </div>
+    );
+  }
+
   const hash = hashSlug(slug);
   const Icon = ICONS[hash % ICONS.length];
   const flipped = hash % 2 === 0;
@@ -30,10 +53,7 @@ export function ArticleCover({
       } ${className ?? ""}`}
       aria-hidden="true"
     >
-      <Icon
-        className="size-14 text-foreground/15"
-        strokeWidth={1.25}
-      />
+      <Icon className="size-14 text-foreground/15" strokeWidth={1.25} />
     </div>
   );
 }

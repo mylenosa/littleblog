@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ArticleCard } from "@/components/articles/article-card";
-import type { ArticleMeta } from "@/lib/mdx/articles";
+import type { ArticleMeta } from "@/lib/queries/articles";
 import { normalizeText } from "@/lib/normalize-text";
 
 export function SearchResults({

@@ -5,17 +5,19 @@ import { TagBadge } from "@/components/articles/tag-badge";
 import { ArticleMeta } from "@/components/articles/article-meta";
 import {
   getAllTags,
-  getFeaturedArticles,
+  getFeaturedArticlesForHome,
   getRecentArticles,
-} from "@/lib/mdx/articles";
+} from "@/lib/queries/articles";
 
-export default function Home() {
-  const featured = getFeaturedArticles();
+export default async function Home() {
+  const [featured, allRecent, allTags] = await Promise.all([
+    getFeaturedArticlesForHome(),
+    getRecentArticles(),
+    getAllTags(),
+  ]);
   const [hero, ...restFeatured] = featured;
-  const recent = getRecentArticles().filter(
-    (article) => article.slug !== hero?.slug
-  );
-  const tags = getAllTags().slice(0, 10);
+  const recent = allRecent.filter((article) => article.slug !== hero?.slug);
+  const tags = allTags.slice(0, 10);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
@@ -29,7 +31,12 @@ export default function Home() {
               href={`/artigos/${hero.slug}`}
               className="group rounded-xl focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
             >
-              <ArticleCover slug={hero.slug} className="aspect-[4/3] md:aspect-square" />
+              <ArticleCover
+                slug={hero.slug}
+                src={hero.coverImageUrl}
+                alt={hero.title}
+                className="aspect-[4/3] md:aspect-square"
+              />
             </Link>
             <div className="flex flex-col gap-3">
               <div className="flex flex-wrap gap-1.5">
@@ -47,7 +54,7 @@ export default function Home() {
               </h1>
               <p className="text-muted-foreground">{hero.summary}</p>
               <ArticleMeta
-                author={hero.author}
+                authorName={hero.authorName}
                 publishedAt={hero.publishedAt}
                 readingTimeMinutes={hero.readingTimeMinutes}
               />

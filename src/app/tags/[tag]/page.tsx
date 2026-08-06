@@ -1,11 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ArticleCard } from "@/components/articles/article-card";
-import { getAllTags, getArticlesByTag } from "@/lib/mdx/articles";
-
-export function generateStaticParams() {
-  return getAllTags().map(({ tag }) => ({ tag }));
-}
+import { getArticlesByTag } from "@/lib/queries/articles";
 
 export async function generateMetadata(
   props: PageProps<"/tags/[tag]">
@@ -17,7 +13,7 @@ export async function generateMetadata(
 export default async function TagPage(props: PageProps<"/tags/[tag]">) {
   const { tag: rawTag } = await props.params;
   const tag = decodeURIComponent(rawTag);
-  const articles = getArticlesByTag(tag);
+  const articles = await getArticlesByTag(tag);
 
   if (articles.length === 0) notFound();
 

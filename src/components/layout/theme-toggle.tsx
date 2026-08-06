@@ -21,11 +21,7 @@ export function ThemeToggle() {
       onClick={() => setTheme(isDark ? "light" : "dark")}
     >
       {mounted ? (
-        isDark ? (
-          <Sun aria-hidden="true" />
-        ) : (
-          <Moon aria-hidden="true" />
-        )
+        isDark ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />
       ) : (
         <span className="size-4" aria-hidden="true" />
       )}

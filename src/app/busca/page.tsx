@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { SearchResults } from "@/components/search/search-results";
-import { getAllArticles } from "@/lib/mdx/articles";
+import { getAllArticles } from "@/lib/queries/articles";
 
 export const metadata: Metadata = {
   title: "Busca",
@@ -15,7 +15,7 @@ export default async function BuscaPage(props: PageProps<"/busca">) {
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <h1 className="mb-8 text-3xl font-semibold tracking-tight">Busca</h1>
-      <SearchResults articles={getAllArticles()} initialQuery={initialQuery} />
+      <SearchResults articles={await getAllArticles()} initialQuery={initialQuery} />
     </div>
   );
 }

@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import { getAllTags } from "@/lib/mdx/articles";
+import { getAllTags } from "@/lib/queries/articles";
 
 export const metadata: Metadata = {
   title: "Tags",
   description: "Explore os artigos do blog por tag.",
 };
 
-export default function TagsPage() {
-  const tags = getAllTags();
+export default async function TagsPage() {
+  const tags = await getAllTags();
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">

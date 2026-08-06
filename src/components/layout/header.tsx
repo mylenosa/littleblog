@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { UserMenu } from "@/components/layout/user-menu";
+import { getAuthState } from "@/lib/supabase/auth-state";
 
 const NAV_LINKS = [
   { href: "/tags", label: "Tags" },
@@ -11,7 +12,9 @@ const NAV_LINKS = [
   { href: "/contato", label: "Contato" },
 ];
 
-export function Header() {
+export async function Header() {
+  const { user, profile } = await getAuthState();
+
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/70">
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4 sm:px-6">
@@ -48,9 +51,9 @@ export function Header() {
           </Button>
           <ThemeToggle />
           <div className="hidden sm:block">
-            <UserMenu />
+            <UserMenu user={user} profile={profile} />
           </div>
-          <MobileNav links={NAV_LINKS} />
+          <MobileNav links={NAV_LINKS} user={user} profile={profile} />
         </div>
       </div>
     </header>
