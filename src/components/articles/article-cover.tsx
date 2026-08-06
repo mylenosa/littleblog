@@ -1,5 +1,7 @@
 import Image from "next/image";
 import { Disc3, Music2, Radio, Waves } from "lucide-react";
+import { PresetVisual } from "@/components/common/preset-visual";
+import { isPresetValue, presetIdFromValue } from "@/lib/constants/image-presets";
 
 const ICONS = [Disc3, Music2, Radio, Waves];
 
@@ -22,6 +24,12 @@ export function ArticleCover({
   alt?: string;
   className?: string;
 }) {
+  if (src && isPresetValue(src)) {
+    return (
+      <PresetVisual presetId={presetIdFromValue(src)} shape="card" className={className} />
+    );
+  }
+
   if (src) {
     return (
       <div

@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Pencil } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { ArticleCover } from "@/components/articles/article-cover";
 import { ArticleMeta } from "@/components/articles/article-meta";
 import { TagBadge } from "@/components/articles/tag-badge";
@@ -49,7 +52,7 @@ export default async function ArticlePage(
   if (!article) notFound();
 
   const related = await getRelatedArticles(slug);
-  const { user } = await getAuthState();
+  const { user, profile } = await getAuthState();
 
   let isFavorited = false;
   if (user) {
@@ -66,10 +69,22 @@ export default async function ArticlePage(
   return (
     <article className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
       <header className="mb-8 flex flex-col gap-4">
-        <div className="flex flex-wrap gap-1.5">
-          {article.tags.map((tag) => (
-            <TagBadge key={tag} tag={tag} />
-          ))}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap gap-1.5">
+            {article.tags.map((tag) => (
+              <TagBadge key={tag} tag={tag} />
+            ))}
+          </div>
+          {profile?.isEditor && (
+            <Button
+              variant="outline"
+              size="sm"
+              nativeButton={false}
+              render={<Link href={`/admin/artigos/${article.slug}`} />}
+            >
+              <Pencil /> Editar artigo
+            </Button>
+          )}
         </div>
         <h1 className="text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
           {article.title}

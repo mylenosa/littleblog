@@ -186,7 +186,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      admin_list_users: {
+        Args: never
+        Returns: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          is_editor: boolean
+        }[]
+      }
+      admin_set_editor: {
+        Args: { new_is_editor: boolean; target_user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

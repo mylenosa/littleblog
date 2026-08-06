@@ -24,10 +24,12 @@ export function CommentItem({
   comment,
   articleSlug,
   currentUserId,
+  isEditor = false,
 }: {
   comment: CommentNode;
   articleSlug: string;
   currentUserId: string | null;
+  isEditor?: boolean;
 }) {
   const [isReplying, setIsReplying] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -36,6 +38,7 @@ export function CommentItem({
   const [isDeleting, setIsDeleting] = useState(false);
 
   const isOwn = currentUserId === comment.userId;
+  const canDelete = isOwn || isEditor;
 
   async function handleSave() {
     setIsSaving(true);
@@ -115,45 +118,46 @@ export function CommentItem({
               </button>
             )}
             {isOwn && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => setIsEditing(true)}
-                  className="font-medium text-muted-foreground hover:text-primary"
+              <button
+                type="button"
+                onClick={() => setIsEditing(true)}
+                className="font-medium text-muted-foreground hover:text-primary"
+              >
+                Editar
+              </button>
+            )}
+            {canDelete && (
+              <AlertDialog>
+                <AlertDialogTrigger
+                  render={
+                    <button
+                      type="button"
+                      className="font-medium text-muted-foreground hover:text-destructive"
+                    />
+                  }
                 >
-                  Editar
-                </button>
-                <AlertDialog>
-                  <AlertDialogTrigger
-                    render={
-                      <button
-                        type="button"
-                        className="font-medium text-muted-foreground hover:text-destructive"
-                      />
-                    }
-                  >
-                    Excluir
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Excluir comentário?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Essa ação não pode ser desfeita. As respostas a este
-                        comentário também serão removidas.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                      <AlertDialogAction
-                        disabled={isDeleting}
-                        onClick={handleDelete}
-                      >
-                        {isDeleting ? "Excluindo..." : "Excluir"}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </>
+                  Excluir
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Excluir comentário?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {isOwn
+                        ? "Essa ação não pode ser desfeita. As respostas a este comentário também serão removidas."
+                        : "Você está excluindo um comentário de outra pessoa como editor. Essa ação não pode ser desfeita, e as respostas a este comentário também serão removidas."}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction
+                      disabled={isDeleting}
+                      onClick={handleDelete}
+                    >
+                      {isDeleting ? "Excluindo..." : "Excluir"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             )}
           </div>
         )}
@@ -179,6 +183,7 @@ export function CommentItem({
               comment={reply}
               articleSlug={articleSlug}
               currentUserId={currentUserId}
+              isEditor={isEditor}
             />
           ))}
         </div>
