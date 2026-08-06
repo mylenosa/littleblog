@@ -69,8 +69,8 @@
   --destructive: #840016;
   --spotlight: #840016;
   --spotlight-foreground: #fbeeef;
-  --border: #d8d0c5;
-  --input: #d8d0c5;
+  --border: #8c8072;
+  --input: #8c8072;
   --ring: #0e4c64;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
@@ -106,8 +106,8 @@
   --destructive: #e2657a;
   --spotlight: #e2657a;
   --spotlight-foreground: #2b060b;
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
+  --border: oklch(1 0 0 / 35%);
+  --input: oklch(1 0 0 / 35%);
   --ring: #63afc9;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
