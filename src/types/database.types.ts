@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      articles: {
+        Row: {
+          author_name: string
+          content: string
+          cover_image_url: string | null
+          created_at: string
+          created_by: string | null
+          featured: boolean
+          featured_position: number
+          id: string
+          published_at: string
+          slug: string
+          summary: string
+          tags: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_name: string
+          content: string
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          featured?: boolean
+          featured_position?: number
+          id?: string
+          published_at?: string
+          slug: string
+          summary: string
+          tags?: string[]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_name?: string
+          content?: string
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          featured?: boolean
+          featured_position?: number
+          id?: string
+          published_at?: string
+          slug?: string
+          summary?: string
+          tags?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           article_slug: string
@@ -97,27 +148,6 @@ export type Database = {
           created_at?: string
           id?: string
           user_id?: string
-        }
-        Relationships: []
-      }
-      featured_articles: {
-        Row: {
-          article_slug: string
-          created_at: string
-          position: number
-          updated_at: string
-        }
-        Insert: {
-          article_slug: string
-          created_at?: string
-          position?: number
-          updated_at?: string
-        }
-        Update: {
-          article_slug?: string
-          created_at?: string
-          position?: number
-          updated_at?: string
         }
         Relationships: []
       }
