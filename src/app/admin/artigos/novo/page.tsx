@@ -16,7 +16,9 @@ export default async function NovoArtigoPage() {
 
   return (
     <div>
-      <AdminBreadcrumb items={[{ label: "Artigos", href: "/admin" }, { label: "Novo" }]} />
+      <AdminBreadcrumb
+        items={[{ label: "Artigos", href: "/admin/artigos" }, { label: "Novo" }]}
+      />
       <h1 className="mb-8 text-3xl font-semibold tracking-tight">Novo artigo</h1>
       <ArticleForm
         mode="create"

@@ -23,7 +23,7 @@ export default async function EditarArtigoPage(
   return (
     <div>
       <AdminBreadcrumb
-        items={[{ label: "Artigos", href: "/admin" }, { label: article.title }]}
+        items={[{ label: "Artigos", href: "/admin/artigos" }, { label: article.title }]}
       />
       <h1 className="mb-8 text-3xl font-semibold tracking-tight">Editar artigo</h1>
       <ArticleForm

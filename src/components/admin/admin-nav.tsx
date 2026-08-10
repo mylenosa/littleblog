@@ -5,15 +5,12 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const LINKS = [
-  { href: "/admin", label: "Artigos" },
+  { href: "/admin/artigos", label: "Artigos" },
   { href: "/admin/usuarios", label: "Usuários" },
   { href: "/admin/mensagens", label: "Mensagens" },
 ];
 
 function isActive(pathname: string, href: string) {
-  if (href === "/admin") {
-    return pathname === "/admin" || pathname.startsWith("/admin/artigos");
-  }
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 

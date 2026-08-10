@@ -9,10 +9,8 @@ function countComments(nodes: Awaited<ReturnType<typeof getCommentsForArticle>>)
 }
 
 export async function CommentThread({ articleSlug }: { articleSlug: string }) {
-  const [comments, { user, profile }] = await Promise.all([
-    getCommentsForArticle(articleSlug),
-    getAuthState(),
-  ]);
+  const { user, profile } = await getAuthState();
+  const comments = await getCommentsForArticle(articleSlug, user?.id ?? null);
 
   const total = countComments(comments);
 

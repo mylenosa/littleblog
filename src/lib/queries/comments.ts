@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { summarizeReactions, type ReactionSummary } from "@/lib/queries/reactions";
 
 export type CommentNode = {
   id: string;
@@ -7,11 +8,13 @@ export type CommentNode = {
   updatedAt: string;
   userId: string;
   authorName: string;
+  reactions: ReactionSummary[];
   replies: CommentNode[];
 };
 
 export async function getCommentsForArticle(
-  articleSlug: string
+  articleSlug: string,
+  currentUserId: string | null = null
 ): Promise<CommentNode[]> {
   const supabase = await createClient();
 
@@ -33,6 +36,21 @@ export async function getCommentsForArticle(
     (profiles ?? []).map((p) => [p.id, p.full_name || "Usuário"])
   );
 
+  const { data: reactionRows } = await supabase
+    .from("comment_reactions")
+    .select("comment_id, emoji, user_id")
+    .in(
+      "comment_id",
+      comments.map((c) => c.id)
+    );
+
+  const reactionsByComment = new Map<string, { emoji: string; user_id: string }[]>();
+  for (const row of reactionRows ?? []) {
+    const list = reactionsByComment.get(row.comment_id) ?? [];
+    list.push(row);
+    reactionsByComment.set(row.comment_id, list);
+  }
+
   const nodeById = new Map<string, CommentNode>();
   for (const comment of comments) {
     nodeById.set(comment.id, {
@@ -42,6 +60,7 @@ export async function getCommentsForArticle(
       updatedAt: comment.updated_at,
       userId: comment.user_id,
       authorName: nameByUserId.get(comment.user_id) ?? "Usuário",
+      reactions: summarizeReactions(reactionsByComment.get(comment.id) ?? [], currentUserId),
       replies: [],
     });
   }

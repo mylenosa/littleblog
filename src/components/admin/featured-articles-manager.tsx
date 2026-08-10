@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { TagBadge } from "@/components/articles/tag-badge";
@@ -69,10 +70,14 @@ export function FeaturedArticlesManager({
               >
                 {article.title}
               </Link>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap items-center gap-1.5">
                 {article.tags.slice(0, 3).map((tag) => (
                   <TagBadge key={tag} tag={tag} />
                 ))}
+                <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                  <Eye className="size-3.5" aria-hidden="true" />
+                  {article.viewCount.toLocaleString("pt-BR")}
+                </span>
               </div>
             </div>
             <div className="flex items-center gap-2">

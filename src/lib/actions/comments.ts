@@ -32,6 +32,19 @@ export async function createComment(input: {
     return { success: false, message: "Faça login para comentar." };
   }
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("can_comment")
+    .eq("id", user.id)
+    .single();
+
+  if (profile && !profile.can_comment) {
+    return {
+      success: false,
+      message: "Sua conta está impedida de comentar no momento.",
+    };
+  }
+
   const { error } = await supabase.from("comments").insert({
     article_slug: input.articleSlug,
     user_id: user.id,
