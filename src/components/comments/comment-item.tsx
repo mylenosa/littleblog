@@ -16,6 +16,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { CommentForm } from "@/components/comments/comment-form";
+import { CommentReactions } from "@/components/comments/comment-reactions";
 import { updateComment, deleteComment } from "@/lib/actions/comments";
 import { formatDate } from "@/lib/format-date";
 import type { CommentNode } from "@/lib/queries/comments";
@@ -104,6 +105,15 @@ export function CommentItem({
           </div>
         ) : (
           <p className="whitespace-pre-wrap text-sm">{comment.content}</p>
+        )}
+
+        {!isEditing && (
+          <CommentReactions
+            commentId={comment.id}
+            articleSlug={articleSlug}
+            initialReactions={comment.reactions}
+            isLoggedIn={!!currentUserId}
+          />
         )}
 
         {!isEditing && (

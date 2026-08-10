@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      article_reactions: {
+        Row: {
+          article_slug: string
+          created_at: string
+          emoji: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          article_slug: string
+          created_at?: string
+          emoji: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          article_slug?: string
+          created_at?: string
+          emoji?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       articles: {
         Row: {
           author_name: string
@@ -30,6 +54,7 @@ export type Database = {
           tags: string[]
           title: string
           updated_at: string
+          view_count: number
         }
         Insert: {
           author_name: string
@@ -46,6 +71,7 @@ export type Database = {
           tags?: string[]
           title: string
           updated_at?: string
+          view_count?: number
         }
         Update: {
           author_name?: string
@@ -62,8 +88,41 @@ export type Database = {
           tags?: string[]
           title?: string
           updated_at?: string
+          view_count?: number
         }
         Relationships: []
+      }
+      comment_reactions: {
+        Row: {
+          comment_id: string
+          created_at: string
+          emoji: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          comment_id: string
+          created_at?: string
+          emoji: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          comment_id?: string
+          created_at?: string
+          emoji?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comment_reactions_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       comments: {
         Row: {
@@ -155,6 +214,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
+          can_comment: boolean
           created_at: string
           full_name: string | null
           id: string
@@ -164,6 +224,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          can_comment?: boolean
           created_at?: string
           full_name?: string | null
           id: string
@@ -173,6 +234,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          can_comment?: boolean
           created_at?: string
           full_name?: string | null
           id?: string
@@ -189,6 +251,7 @@ export type Database = {
       admin_list_users: {
         Args: never
         Returns: {
+          can_comment: boolean
           created_at: string
           email: string
           full_name: string
@@ -196,8 +259,16 @@ export type Database = {
           is_editor: boolean
         }[]
       }
+      admin_set_can_comment: {
+        Args: { new_can_comment: boolean; target_user_id: string }
+        Returns: undefined
+      }
       admin_set_editor: {
         Args: { new_is_editor: boolean; target_user_id: string }
+        Returns: undefined
+      }
+      increment_article_views: {
+        Args: { article_slug_input: string }
         Returns: undefined
       }
     }

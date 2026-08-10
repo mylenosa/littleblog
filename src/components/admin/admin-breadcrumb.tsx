@@ -8,7 +8,9 @@ export function AdminBreadcrumb({
 }) {
   return (
     <nav aria-label="Trilha" className="mb-4 flex flex-wrap items-center gap-1 text-sm text-muted-foreground">
-      <span>Admin</span>
+      <Link href="/admin" className="hover:text-primary hover:underline">
+        Admin
+      </Link>
       {items.map((item, index) => (
         <span key={index} className="flex items-center gap-1">
           <ChevronRight className="size-3.5" aria-hidden="true" />

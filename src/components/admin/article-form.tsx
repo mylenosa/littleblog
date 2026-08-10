@@ -7,11 +7,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import {
   Bold,
+  Code,
+  Film,
+  Heading1,
   Heading2,
+  ImagePlus,
   Italic,
   Link as LinkIcon,
   List,
+  ListOrdered,
   Quote,
+  Strikethrough,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -75,6 +81,8 @@ export function ArticleForm({
   const [isDeleting, setIsDeleting] = useState(false);
   const [slugTouched, setSlugTouched] = useState(mode === "edit");
   const contentRef = useRef<HTMLTextAreaElement | null>(null);
+  const inlineImageInputRef = useRef<HTMLInputElement | null>(null);
+  const [uploadingInlineImage, setUploadingInlineImage] = useState(false);
 
   const {
     register,
@@ -124,6 +132,39 @@ export function ArticleForm({
     setUploading(false);
   }
 
+  function insertAtCursor(text: string) {
+    const el = contentRef.current;
+    const current = getValues("content") || "";
+    const start = el?.selectionStart ?? current.length;
+    const end = el?.selectionEnd ?? current.length;
+
+    const next = current.slice(0, start) + text + current.slice(end);
+    setValue("content", next, { shouldDirty: true });
+    placeCursor(start + text.length);
+  }
+
+  async function handleInlineImageChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    setUploadingInlineImage(true);
+    const supabase = createClient();
+    const path = `${Date.now()}-${slugify(file.name.replace(/\.[^.]+$/, ""))}`;
+
+    const { error } = await supabase.storage.from("article-media").upload(path, file);
+
+    if (error) {
+      toast.error("Não foi possível enviar a imagem.");
+      setUploadingInlineImage(false);
+      return;
+    }
+
+    const { data } = supabase.storage.from("article-media").getPublicUrl(path);
+    insertAtCursor(`\n\n![](${data.publicUrl})\n\n`);
+    setUploadingInlineImage(false);
+  }
+
   function placeCursor(position: number) {
     requestAnimationFrame(() => {
       const el = contentRef.current;
@@ -165,7 +206,7 @@ export function ArticleForm({
 
     if (result.success) {
       toast.success(mode === "create" ? "Artigo criado." : "Artigo atualizado.");
-      router.push("/admin");
+      router.push("/admin/artigos");
     } else {
       toast.error(result.message);
     }
@@ -179,7 +220,7 @@ export function ArticleForm({
 
     if (result.success) {
       toast.success("Artigo excluído.");
-      router.push("/admin");
+      router.push("/admin/artigos");
     } else {
       toast.error(result.message);
     }
@@ -303,7 +344,8 @@ export function ArticleForm({
             <p className="text-xs text-muted-foreground">
               Use os botões abaixo pra formatar sem precisar saber a sintaxe.
               Selecione um trecho de texto antes de clicar, se quiser aplicar
-              só nele.
+              só nele. No botão de vídeo, troque o link de exemplo pelo link
+              real do YouTube ou Vimeo.
             </p>
             <div className="rounded-t-lg border border-b-0 border-input bg-muted/50 shadow-sm">
               <div className="flex flex-wrap items-center gap-0.5 p-1.5">
@@ -328,9 +370,29 @@ export function ArticleForm({
                   >
                     <Italic />
                   </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    title="Riscado"
+                    aria-label="Riscado"
+                    onClick={() => wrapSelection("~~", "~~", "texto riscado")}
+                  >
+                    <Strikethrough />
+                  </Button>
                 </div>
                 <div className="mx-1 h-5 w-px bg-border" aria-hidden="true" />
                 <div className="flex items-center gap-0.5">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    title="Título"
+                    aria-label="Título"
+                    onClick={() => prefixLine("# ")}
+                  >
+                    <Heading1 />
+                  </Button>
                   <Button
                     type="button"
                     variant="ghost"
@@ -351,6 +413,9 @@ export function ArticleForm({
                   >
                     <Quote />
                   </Button>
+                </div>
+                <div className="mx-1 h-5 w-px bg-border" aria-hidden="true" />
+                <div className="flex items-center gap-0.5">
                   <Button
                     type="button"
                     variant="ghost"
@@ -361,18 +426,77 @@ export function ArticleForm({
                   >
                     <List />
                   </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    title="Lista numerada"
+                    aria-label="Lista numerada"
+                    onClick={() => prefixLine("1. ")}
+                  >
+                    <ListOrdered />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    title="Código"
+                    aria-label="Código"
+                    onClick={() => wrapSelection("`", "`", "código")}
+                  >
+                    <Code />
+                  </Button>
                 </div>
                 <div className="mx-1 h-5 w-px bg-border" aria-hidden="true" />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  title="Link"
-                  aria-label="Link"
-                  onClick={() => wrapSelection("[", "](https://)", "texto do link")}
-                >
-                  <LinkIcon />
-                </Button>
+                <div className="flex items-center gap-0.5">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    title="Link"
+                    aria-label="Link"
+                    onClick={() => wrapSelection("[", "](https://)", "texto do link")}
+                  >
+                    <LinkIcon />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    title="Inserir imagem"
+                    aria-label="Inserir imagem"
+                    disabled={uploadingInlineImage}
+                    onClick={() => inlineImageInputRef.current?.click()}
+                  >
+                    <ImagePlus />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    title="Incorporar vídeo (YouTube ou Vimeo)"
+                    aria-label="Incorporar vídeo"
+                    onClick={() =>
+                      insertAtCursor(
+                        "\n\n[Vídeo](https://www.youtube.com/watch?v=)\n\n"
+                      )
+                    }
+                  >
+                    <Film />
+                  </Button>
+                  <input
+                    ref={inlineImageInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="sr-only"
+                    onChange={handleInlineImageChange}
+                  />
+                </div>
+                {uploadingInlineImage && (
+                  <span className="px-2 text-xs text-muted-foreground">
+                    Enviando imagem...
+                  </span>
+                )}
               </div>
             </div>
             <Textarea

@@ -17,6 +17,7 @@ export default async function UsuariosPage() {
     email: row.email,
     fullName: row.full_name,
     isEditor: row.is_editor,
+    canComment: row.can_comment,
     createdAt: row.created_at,
   }));
 
@@ -24,7 +25,7 @@ export default async function UsuariosPage() {
     <div>
       <h1 className="mb-2 text-3xl font-semibold tracking-tight">Usuários</h1>
       <p className="mb-8 text-muted-foreground">
-        Conceda ou remova acesso de editor para outras contas.
+        Busque, conceda acesso de editor ou bloqueie comentários de outras contas.
       </p>
       <UsersManager users={users} currentUserId={user!.id} />
     </div>

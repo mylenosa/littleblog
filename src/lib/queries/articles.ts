@@ -13,6 +13,7 @@ export type ArticleMeta = {
   featured: boolean;
   featuredPosition: number;
   readingTimeMinutes: number;
+  viewCount: number;
 };
 
 export type Article = ArticleMeta & {
@@ -30,6 +31,7 @@ type ArticleRow = {
   published_at: string;
   featured: boolean;
   featured_position: number;
+  view_count: number;
 };
 
 function readingTime(content: string) {
@@ -50,16 +52,18 @@ function toArticle(row: ArticleRow): Article {
     featured: row.featured,
     featuredPosition: row.featured_position,
     readingTimeMinutes: readingTime(row.content),
+    viewCount: row.view_count,
   };
 }
+
+const ARTICLE_COLUMNS =
+  "slug, title, summary, content, tags, author_name, cover_image_url, published_at, featured, featured_position, view_count";
 
 export async function getAllArticles(): Promise<Article[]> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("articles")
-    .select(
-      "slug, title, summary, content, tags, author_name, cover_image_url, published_at, featured, featured_position"
-    )
+    .select(ARTICLE_COLUMNS)
     .order("published_at", { ascending: false });
 
   return (data ?? []).map(toArticle);
@@ -69,9 +73,7 @@ export async function getArticleBySlug(slug: string): Promise<Article | undefine
   const supabase = await createClient();
   const { data } = await supabase
     .from("articles")
-    .select(
-      "slug, title, summary, content, tags, author_name, cover_image_url, published_at, featured, featured_position"
-    )
+    .select(ARTICLE_COLUMNS)
     .eq("slug", slug)
     .maybeSingle();
 

@@ -33,6 +33,7 @@ async function requireEditor() {
 
 function revalidateArticlePaths(slug: string) {
   revalidatePath("/admin");
+  revalidatePath("/admin/artigos");
   revalidatePath("/");
   revalidatePath("/tags");
   revalidatePath("/busca");
@@ -155,6 +156,7 @@ export async function setFeatured(
   }
 
   revalidatePath("/admin");
+  revalidatePath("/admin/artigos");
   revalidatePath("/");
   return { success: true };
 }
@@ -171,6 +173,28 @@ export async function setEditorStatus(
   const { error } = await supabase.rpc("admin_set_editor", {
     target_user_id: targetUserId,
     new_is_editor: newIsEditor,
+  });
+
+  if (error) {
+    return { success: false, message: "Não foi possível atualizar o usuário." };
+  }
+
+  revalidatePath("/admin/usuarios");
+  return { success: true };
+}
+
+export async function setCanComment(
+  targetUserId: string,
+  newCanComment: boolean
+): Promise<AdminActionResult> {
+  const { supabase, ok } = await requireEditor();
+  if (!ok) {
+    return { success: false, message: "Apenas editores podem fazer isso." };
+  }
+
+  const { error } = await supabase.rpc("admin_set_can_comment", {
+    target_user_id: targetUserId,
+    new_can_comment: newCanComment,
   });
 
   if (error) {
@@ -200,6 +224,7 @@ export async function updateFeaturedPosition(
   }
 
   revalidatePath("/admin");
+  revalidatePath("/admin/artigos");
   revalidatePath("/");
   return { success: true };
 }
