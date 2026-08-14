@@ -17,7 +17,7 @@ export function Footer() {
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-3">
         <div className="flex flex-col gap-3">
           <span className="text-lg font-semibold tracking-tight">
-            [Nome do Blog]
+            Quarto
           </span>
           <p className="max-w-xs text-sm text-muted-foreground">
             Notícias, shows, festivais e lançamentos para quem vive de
@@ -83,7 +83,7 @@ export function Footer() {
       </div>
 
       <div className="border-t border-border px-4 py-6 text-center text-xs text-muted-foreground sm:px-6">
-        © {year} [Nome do Blog]. Todos os direitos reservados.
+        © {year} Quarto. Todos os direitos reservados.
       </div>
     </footer>
   );
