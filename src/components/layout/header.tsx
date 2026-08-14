@@ -22,7 +22,7 @@ export async function Header() {
           href="/"
           className="shrink-0 rounded-md text-lg font-semibold tracking-tight focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
         >
-          [Nome do Blog]
+          Quarto
         </Link>
 
         <nav
