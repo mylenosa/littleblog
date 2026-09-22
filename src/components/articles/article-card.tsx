@@ -17,7 +17,7 @@ export function ArticleCard({ article }: { article: ArticleMetaType }) {
     <article className="group flex flex-col gap-3">
       <Link
         href={`/artigos/${article.slug}`}
-        className={`${tilt(article.slug)} rounded-sm border-6 border-photo-border p-0 shadow-sm transition-transform hover:rotate-0 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50`}
+        className={`${tilt(article.slug)} rounded-sm border-6 border-photo-border bg-photo-border p-0 shadow-sm transition-transform hover:rotate-0 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50`}
       >
         <ArticleCover
           slug={article.slug}
