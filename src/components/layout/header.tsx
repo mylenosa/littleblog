@@ -20,7 +20,7 @@ export async function Header() {
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4 sm:px-6">
         <Link
           href="/"
-          className="shrink-0 rounded-md text-lg font-semibold tracking-tight focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+          className="shrink-0 rounded-md font-heading text-3xl font-bold tracking-tight text-primary focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
         >
           Quarto
         </Link>
