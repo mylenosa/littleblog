@@ -29,7 +29,7 @@ export default async function Home() {
           <div className="grid gap-6 md:grid-cols-2 md:items-center">
             <Link
               href={`/artigos/${hero.slug}`}
-              className="group rounded-xl focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="group -rotate-2 rounded-sm border-8 border-photo-border p-0 shadow-lg transition-transform hover:rotate-0 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               <ArticleCover
                 slug={hero.slug}
@@ -44,7 +44,7 @@ export default async function Home() {
                   <TagBadge key={tag} tag={tag} />
                 ))}
               </div>
-              <h1 className="text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">
+              <h1 className="font-heading text-4xl leading-tight tracking-tight sm:text-5xl">
                 <Link
                   href={`/artigos/${hero.slug}`}
                   className="rounded-sm hover:text-primary focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
@@ -65,7 +65,7 @@ export default async function Home() {
 
       {restFeatured.length > 0 && (
         <section aria-labelledby="destaques" className="mb-14">
-          <h2 id="destaques" className="mb-5 text-lg font-semibold tracking-tight">
+          <h2 id="destaques" className="mb-5 font-heading text-3xl tracking-tight">
             Também em destaque
           </h2>
           <div className="grid gap-8 sm:grid-cols-2">
@@ -80,7 +80,7 @@ export default async function Home() {
         <section aria-labelledby="tags-em-alta" className="mb-14">
           <h2
             id="tags-em-alta"
-            className="mb-4 text-lg font-semibold tracking-tight"
+            className="mb-4 font-heading text-3xl tracking-tight"
           >
             Explorar por tag
           </h2>
@@ -93,7 +93,7 @@ export default async function Home() {
       )}
 
       <section aria-labelledby="recentes">
-        <h2 id="recentes" className="mb-5 text-lg font-semibold tracking-tight">
+        <h2 id="recentes" className="mb-5 font-heading text-3xl tracking-tight">
           Publicações recentes
         </h2>
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
