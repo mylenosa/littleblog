@@ -29,7 +29,7 @@ export default async function Home() {
           <div className="grid gap-6 md:grid-cols-2 md:items-center">
             <Link
               href={`/artigos/${hero.slug}`}
-              className="group -rotate-2 rounded-sm border-8 border-photo-border p-0 shadow-lg transition-transform hover:rotate-0 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="group -rotate-2 rounded-sm border-8 border-photo-border bg-photo-border p-0 shadow-lg transition-transform hover:rotate-0 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               <ArticleCover
                 slug={hero.slug}
