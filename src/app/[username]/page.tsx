@@ -147,7 +147,7 @@ export default async function PublicProfilePage(
             )}
           </div>
 
-          <div className="grid sm:grid-cols-[220px_1fr]">
+          <div className="grid grid-cols-1 sm:grid-cols-[220px_1fr]">
             <div
               className="border-b border-dashed border-black/15 p-6 sm:border-r sm:border-b-0"
               style={{
