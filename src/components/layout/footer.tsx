@@ -1,12 +1,11 @@
 import Link from "next/link";
-import { Music2 } from "lucide-react";
-import { InstagramIcon, XIcon, YoutubeIcon } from "@/components/icons/social-icons";
+import { InstagramIcon, SpotifyIcon, XIcon, YoutubeIcon } from "@/components/icons/social-icons";
 
 const SOCIAL_LINKS = [
   { href: "#", label: "Instagram", Icon: InstagramIcon },
   { href: "#", label: "X (Twitter)", Icon: XIcon },
   { href: "#", label: "YouTube", Icon: YoutubeIcon },
-  { href: "#", label: "Spotify", Icon: Music2 },
+  { href: "#", label: "Spotify", Icon: SpotifyIcon },
 ];
 
 export function Footer() {

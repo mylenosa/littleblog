@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -54,6 +55,7 @@ export function ProfileForm({
 }: {
   defaultValues: ProfileInput;
 }) {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -145,6 +147,7 @@ export function ProfileForm({
     const result = await updateProfile(data);
     if (result.success) {
       toast.success("Perfil atualizado.");
+      router.push(`/${data.username}`);
     } else {
       toast.error(result.message);
     }
@@ -342,28 +345,17 @@ export function ProfileForm({
           <Input id="topTrack" disabled value={topTrack ?? ""} readOnly placeholder="Carregando..." />
         )}
         {musicConfigured === false && (
-          <div className="grid gap-3 sm:grid-cols-2">
-            <MusicSearchInput
-              id="topArtist"
-              type="artist"
-              configured={false}
-              placeholder="Artista"
-              value={topArtist ?? ""}
-              onSelect={() => {}}
-              onClear={() => {}}
-              onFreeTextChange={(value) => setValue("topArtist", value, { shouldDirty: true })}
-            />
-            <MusicSearchInput
-              id="topTrack"
-              type="track"
-              configured={false}
-              placeholder="Música"
-              value={topTrack ?? ""}
-              onSelect={() => {}}
-              onClear={() => {}}
-              onFreeTextChange={(value) => setValue("topTrack", value, { shouldDirty: true })}
-            />
-          </div>
+          <Input
+            id="topTrack"
+            placeholder="ex: The Weeknd — Blinding Lights"
+            value={topArtist ? `${topArtist} — ${topTrack}` : (topTrack ?? "")}
+            onChange={(event) => {
+              setValue("topTrack", event.target.value, { shouldDirty: true });
+              setValue("topArtist", "", { shouldDirty: true });
+              setValue("topArtistSpotifyId", "", { shouldDirty: true });
+              setValue("topTrackSpotifyId", "", { shouldDirty: true });
+            }}
+          />
         )}
         {musicConfigured === true && (
           <MusicSearchInput

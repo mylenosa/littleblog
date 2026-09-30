@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { Music2, Link as LinkIcon } from "lucide-react";
+import { Link as LinkIcon } from "lucide-react";
 import {
   InstagramIcon,
+  SpotifyIcon,
   XIcon,
   YoutubeIcon,
   LastfmIcon,
@@ -11,7 +12,7 @@ import { LINK_PLATFORMS, BUTTON_STYLE_CLASSES, type ButtonStyle } from "@/lib/co
 import type { PublicProfileLink } from "@/lib/queries/profile";
 
 const PLATFORM_ICONS: Record<PublicProfileLink["platform"], React.ComponentType<{ className?: string }>> = {
-  spotify: Music2,
+  spotify: SpotifyIcon,
   instagram: InstagramIcon,
   x: XIcon,
   tiktok: TiktokIcon,
@@ -45,9 +46,9 @@ export function ProfileLinksList({
             href={link.url}
             target="_blank"
             rel="noopener noreferrer nofollow"
-            className={`flex items-center gap-1.5 bg-[color:var(--profile-accent)] px-3 py-1.5 text-xs font-medium text-white ${vertical ? "justify-center" : ""} ${BUTTON_STYLE_CLASSES[buttonStyle]}`}
+            className={`flex items-center gap-2 bg-[color:var(--profile-accent)] px-4 py-2 text-sm font-medium text-white ${vertical ? "justify-center" : ""} ${BUTTON_STYLE_CLASSES[buttonStyle]}`}
           >
-            <Icon className="size-3.5" />
+            <Icon className="size-4" />
             {platformLabel(link.platform)}
           </Link>
         );
