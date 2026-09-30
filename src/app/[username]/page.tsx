@@ -18,16 +18,56 @@ import {
   BACKGROUND_STYLE_CLASSES,
   BANNER_STYLE_CLASSES,
 } from "@/lib/constants/profile-themes";
+import { isPresetValue } from "@/lib/constants/image-presets";
+import { stripMarkdown } from "@/lib/strip-markdown";
 
 export async function generateMetadata(
   props: PageProps<"/[username]">
 ): Promise<Metadata> {
   const { username } = await props.params;
-  const profile = await getPublicProfileByUsername(username);
+  const [profile, { user }] = await Promise.all([
+    getPublicProfileByUsername(username),
+    getAuthState(),
+  ]);
+
+  const notFoundMetadata: Metadata = {
+    title: "Perfil não encontrado",
+    robots: { index: false, follow: false },
+  };
+
+  if (!profile) return notFoundMetadata;
+
+  const isOwner = user?.id === profile.id;
+  if (!profile.isPublic && !isOwner) return notFoundMetadata;
+
+  const title = `@${profile.username}`;
+  const cardTitle = `${profile.fullName} (@${profile.username})`;
+  const bioText = profile.bio ? stripMarkdown(profile.bio) : "";
+  const description =
+    [profile.status, bioText].filter(Boolean).join(" — ").slice(0, 160) ||
+    `Confira o perfil de @${profile.username} no Quarto.`;
+  const images =
+    profile.avatarUrl && !isPresetValue(profile.avatarUrl)
+      ? [profile.avatarUrl]
+      : undefined;
 
   return {
-    title: profile ? `@${profile.username}` : "Perfil não encontrado",
+    title,
+    description,
     robots: { index: false, follow: false },
+    openGraph: {
+      type: "profile",
+      username: profile.username,
+      title: cardTitle,
+      description,
+      images,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: cardTitle,
+      description,
+      images,
+    },
   };
 }
 
