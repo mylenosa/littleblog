@@ -65,6 +65,9 @@ export function ProfileForm({
 
   const { fields, append, remove } = useFieldArray({ control, name: "links" });
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [avatarTab, setAvatarTab] = useState<"upload" | "link" | "icone">(() =>
+    initialAvatarTab(defaultValues.avatarUrl ?? "")
+  );
 
   const avatarUrl = watch("avatarUrl");
   const fullName = watch("fullName");
@@ -180,7 +183,7 @@ export function ProfileForm({
           </span>
         </div>
 
-        <Tabs defaultValue={initialAvatarTab(avatarUrl ?? "")}>
+        <Tabs value={avatarTab} onValueChange={setAvatarTab}>
           <TabsList>
             <TabsTrigger value="upload">Enviar foto</TabsTrigger>
             <TabsTrigger value="link">Colar link</TabsTrigger>
