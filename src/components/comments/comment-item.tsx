@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -69,12 +71,27 @@ export function CommentItem({
     <div className="flex flex-col gap-2">
       <div className="flex flex-col gap-1 rounded-lg border border-border bg-card p-3">
         <div className="flex items-center gap-2 text-sm">
-          <span className="font-medium">{comment.authorName}</span>
+          <Avatar className="size-6">
+            <AvatarImage src={comment.authorAvatarUrl ?? undefined} alt="" />
+            <AvatarFallback className="text-[10px]">
+              {comment.authorName.slice(0, 2).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          {comment.authorUsername ? (
+            <Link
+              href={`/usuarios/${comment.authorUsername}`}
+              className="font-medium hover:text-primary hover:underline"
+            >
+              {comment.authorName}
+            </Link>
+          ) : (
+            <span className="font-medium">{comment.authorName}</span>
+          )}
           <span className="text-muted-foreground" aria-hidden="true">
             ·
           </span>
           <time dateTime={comment.createdAt} className="text-muted-foreground">
-            {formatDate(comment.createdAt.slice(0, 10))}
+            {formatDate(comment.createdAt)}
           </time>
         </div>
 

@@ -37,7 +37,7 @@ export default async function MensagensPage() {
                   dateTime={message.created_at}
                   className="text-xs text-muted-foreground"
                 >
-                  {formatDate(message.created_at.slice(0, 10))}
+                  {formatDate(message.created_at)}
                 </time>
               </div>
               <p className="mb-1 text-sm font-medium">{message.subject}</p>

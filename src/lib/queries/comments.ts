@@ -8,6 +8,8 @@ export type CommentNode = {
   updatedAt: string;
   userId: string;
   authorName: string;
+  authorUsername: string | null;
+  authorAvatarUrl: string | null;
   reactions: ReactionSummary[];
   replies: CommentNode[];
 };
@@ -29,12 +31,10 @@ export async function getCommentsForArticle(
   const userIds = Array.from(new Set(comments.map((c) => c.user_id)));
   const { data: profiles } = await supabase
     .from("profiles")
-    .select("id, full_name")
+    .select("id, full_name, username, avatar_url, is_public")
     .in("id", userIds);
 
-  const nameByUserId = new Map(
-    (profiles ?? []).map((p) => [p.id, p.full_name || "Usuário"])
-  );
+  const profileByUserId = new Map((profiles ?? []).map((p) => [p.id, p]));
 
   const { data: reactionRows } = await supabase
     .from("comment_reactions")
@@ -53,13 +53,19 @@ export async function getCommentsForArticle(
 
   const nodeById = new Map<string, CommentNode>();
   for (const comment of comments) {
+    const authorProfile = profileByUserId.get(comment.user_id);
     nodeById.set(comment.id, {
       id: comment.id,
       content: comment.content,
       createdAt: comment.created_at,
       updatedAt: comment.updated_at,
       userId: comment.user_id,
-      authorName: nameByUserId.get(comment.user_id) ?? "Usuário",
+      authorName: authorProfile?.full_name || "Usuário",
+      authorUsername:
+        authorProfile?.is_public && authorProfile.username
+          ? authorProfile.username
+          : null,
+      authorAvatarUrl: authorProfile?.avatar_url ?? null,
       reactions: summarizeReactions(reactionsByComment.get(comment.id) ?? [], currentUserId),
       replies: [],
     });

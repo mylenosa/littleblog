@@ -111,7 +111,7 @@ export function UsersManager({
               </div>
               <span className="text-sm text-muted-foreground">{user.email}</span>
               <span className="text-xs text-muted-foreground">
-                Cadastrado em {formatDate(user.createdAt.slice(0, 10))}
+                Cadastrado em {formatDate(user.createdAt)}
               </span>
             </div>
             <div className="flex flex-wrap items-center gap-2">

@@ -44,3 +44,21 @@ export function YoutubeIcon(props: SVGProps<SVGSVGElement>) {
     </BaseIcon>
   );
 }
+
+export function TiktokIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <BaseIcon {...props}>
+      <path d="M15 3v10.5a3.5 3.5 0 1 1-3.5-3.5" />
+      <path d="M15 3c0 2.5 2 4.5 4.5 4.5" />
+    </BaseIcon>
+  );
+}
+
+export function LastfmIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <BaseIcon {...props}>
+      <circle cx={12} cy={12} r={9} />
+      <path d="M9 9v6l2-2 1.5 2 1.5-2v-4" />
+    </BaseIcon>
+  );
+}
