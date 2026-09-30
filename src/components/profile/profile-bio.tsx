@@ -1,8 +1,15 @@
 import ReactMarkdown from "react-markdown";
 
-function BioImage({ alt, ...props }: React.ComponentProps<"img">) {
-  // eslint-disable-next-line @next/next/no-img-element
-  return <img alt={alt ?? ""} className="my-2 max-h-48 rounded-sm" {...props} />;
+function BioImage({ alt, style, ...props }: React.ComponentProps<"img">) {
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      alt={alt ?? ""}
+      className="my-2 rounded-sm"
+      style={{ maxHeight: "12rem", width: "auto", maxWidth: "100%", ...style }}
+      {...props}
+    />
+  );
 }
 
 export function ProfileBio({ bio }: { bio: string }) {

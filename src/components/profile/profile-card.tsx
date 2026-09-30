@@ -89,7 +89,15 @@ export function ProfileCard({
         </div>
 
         {nowPlaying && (
-          <div className="mt-4 overflow-hidden whitespace-nowrap rounded-sm border border-dashed border-black/15 bg-black/5 py-1.5">
+          <div
+            className="mt-4 overflow-hidden whitespace-nowrap rounded-sm border border-dashed border-black/15 bg-black/5 py-1.5"
+            style={{
+              maskImage:
+                "linear-gradient(to right, transparent, black 8%, black 92%, transparent)",
+              WebkitMaskImage:
+                "linear-gradient(to right, transparent, black 8%, black 92%, transparent)",
+            }}
+          >
             <div className="inline-flex animate-[profile-marquee_14s_linear_infinite] gap-12 text-xs font-medium text-neutral-700">
               <span>🎧 Ouvindo: {nowPlaying}</span>
               <span aria-hidden="true">🎧 Ouvindo: {nowPlaying}</span>
