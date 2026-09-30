@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArticleCard } from "@/components/articles/article-card";
@@ -15,7 +16,7 @@ import { formatDate } from "@/lib/format-date";
 import { BACKGROUND_STYLE_CLASSES } from "@/lib/constants/profile-themes";
 
 export async function generateMetadata(
-  props: PageProps<"/usuarios/[username]">
+  props: PageProps<"/[username]">
 ): Promise<Metadata> {
   const { username } = await props.params;
   const profile = await getPublicProfileByUsername(username);
@@ -36,7 +37,7 @@ function initials(name: string) {
 }
 
 export default async function PublicProfilePage(
-  props: PageProps<"/usuarios/[username]">
+  props: PageProps<"/[username]">
 ) {
   const { username } = await props.params;
   const [profile, { user }] = await Promise.all([
@@ -73,9 +74,9 @@ export default async function PublicProfilePage(
           <p className="mb-4 rounded-sm border border-dashed border-black/30 bg-white/80 px-3 py-2 text-xs text-neutral-700">
             Seu perfil está marcado como privado — só você está vendo essa página.
             Ative &ldquo;Perfil visível publicamente&rdquo; em{" "}
-            <a href="/perfil" className="underline">
+            <Link href="/perfil" className="underline">
               /perfil
-            </a>{" "}
+            </Link>{" "}
             pra que outras pessoas consigam abrir.
           </p>
         )}

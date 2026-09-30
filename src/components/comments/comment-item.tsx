@@ -79,7 +79,7 @@ export function CommentItem({
           </Avatar>
           {comment.authorUsername ? (
             <Link
-              href={`/usuarios/${comment.authorUsername}`}
+              href={`/${comment.authorUsername}`}
               className="font-medium hover:text-primary hover:underline"
             >
               {comment.authorName}

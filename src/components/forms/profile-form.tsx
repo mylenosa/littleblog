@@ -18,7 +18,9 @@ import {
 } from "@/lib/constants/image-presets";
 import {
   BACKGROUND_STYLES,
+  BACKGROUND_STYLE_CLASSES,
   BUTTON_STYLES,
+  BUTTON_STYLE_CLASSES,
   LINK_PLATFORMS,
 } from "@/lib/constants/profile-themes";
 import { profileSchema, type ProfileInput } from "@/lib/validations/profile.schema";
@@ -58,6 +60,8 @@ export function ProfileForm({
   const avatarUrl = watch("avatarUrl");
   const fullName = watch("fullName");
   const accentColor = watch("accentColor");
+  const backgroundStyle = watch("backgroundStyle");
+  const buttonStyle = watch("buttonStyle");
 
   async function onSubmit(data: ProfileInput) {
     const result = await updateProfile(data);
@@ -86,7 +90,7 @@ export function ProfileForm({
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="username">Nome de usuário</Label>
         <div className="flex items-center gap-1">
-          <span className="text-sm text-muted-foreground">/usuarios/</span>
+          <span className="text-sm text-muted-foreground">/</span>
           <Input
             id="username"
             placeholder="seu_nome"
@@ -160,29 +164,60 @@ export function ProfileForm({
         )}
       </div>
 
-      <div className="rounded-lg border border-dashed border-border p-4">
-        <h3 className="mb-3 text-sm font-semibold">Estilo do perfil (Y2K)</h3>
-        <div className="grid gap-4 sm:grid-cols-2">
+      <div
+        className="rounded-lg border border-dashed border-border p-4"
+        style={{ "--profile-accent": accentColor } as React.CSSProperties}
+      >
+        <h3 className="mb-3 text-sm font-semibold">Aparência do perfil</h3>
+        <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="backgroundStyle">Fundo</Label>
-            <select id="backgroundStyle" className={selectClassName} {...register("backgroundStyle")}>
+            <Label>Fundo</Label>
+            <div className="flex flex-wrap gap-2">
               {BACKGROUND_STYLES.map((style) => (
-                <option key={style.id} value={style.id}>
+                <button
+                  key={style.id}
+                  type="button"
+                  onClick={() =>
+                    setValue("backgroundStyle", style.id, { shouldDirty: true })
+                  }
+                  className={`flex flex-col items-center gap-1 rounded-md border-2 p-1 text-xs ${
+                    backgroundStyle === style.id
+                      ? "border-primary"
+                      : "border-transparent"
+                  }`}
+                >
+                  <span
+                    className={`size-10 rounded-sm border border-border ${BACKGROUND_STYLE_CLASSES[style.id]}`}
+                    aria-hidden="true"
+                  />
                   {style.label}
-                </option>
+                </button>
               ))}
-            </select>
+            </div>
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="buttonStyle">Estilo de botão</Label>
-            <select id="buttonStyle" className={selectClassName} {...register("buttonStyle")}>
+            <Label>Estilo de botão</Label>
+            <div className="flex flex-wrap gap-2">
               {BUTTON_STYLES.map((style) => (
-                <option key={style.id} value={style.id}>
+                <button
+                  key={style.id}
+                  type="button"
+                  onClick={() =>
+                    setValue("buttonStyle", style.id, { shouldDirty: true })
+                  }
+                  className={`flex flex-col items-center gap-1 rounded-md border-2 p-1 text-xs ${
+                    buttonStyle === style.id ? "border-primary" : "border-transparent"
+                  }`}
+                >
+                  <span
+                    className={`flex h-6 w-14 items-center justify-center bg-neutral-400 ${BUTTON_STYLE_CLASSES[style.id]}`}
+                    aria-hidden="true"
+                  />
                   {style.label}
-                </option>
+                </button>
               ))}
-            </select>
+            </div>
           </div>
 
           <div className="flex flex-col gap-1.5">
@@ -214,32 +249,47 @@ export function ProfileForm({
       <div className="flex flex-col gap-2">
         <Label>Links</Label>
         {fields.map((field, index) => (
-          <div key={field.id} className="flex items-center gap-2">
-            <select
-              className={selectClassName}
-              {...register(`links.${index}.platform` as const)}
-            >
-              {LINK_PLATFORMS.map((platform) => (
-                <option key={platform.id} value={platform.id}>
-                  {platform.label}
-                </option>
-              ))}
-            </select>
-            <Input
-              type="url"
-              placeholder="https://..."
-              aria-invalid={!!errors.links?.[index]?.url}
-              {...register(`links.${index}.url` as const)}
-            />
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              aria-label="Remover link"
-              onClick={() => remove(index)}
-            >
-              <Trash2 className="size-4" />
-            </Button>
+          <div key={field.id} className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <div className="flex items-center gap-2">
+              <select
+                className={`${selectClassName} flex-1 sm:w-auto sm:flex-none`}
+                {...register(`links.${index}.platform` as const)}
+              >
+                {LINK_PLATFORMS.map((platform) => (
+                  <option key={platform.id} value={platform.id}>
+                    {platform.label}
+                  </option>
+                ))}
+              </select>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label="Remover link"
+                className="shrink-0 sm:hidden"
+                onClick={() => remove(index)}
+              >
+                <Trash2 className="size-4" />
+              </Button>
+            </div>
+            <div className="flex items-center gap-2">
+              <Input
+                type="url"
+                placeholder="https://..."
+                aria-invalid={!!errors.links?.[index]?.url}
+                {...register(`links.${index}.url` as const)}
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label="Remover link"
+                className="hidden shrink-0 sm:inline-flex"
+                onClick={() => remove(index)}
+              >
+                <Trash2 className="size-4" />
+              </Button>
+            </div>
           </div>
         ))}
         {errors.links && typeof errors.links.message === "string" && (

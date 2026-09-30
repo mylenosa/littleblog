@@ -1,8 +1,8 @@
 export const BACKGROUND_STYLES = [
   { id: "solido", label: "Sólido" },
-  { id: "gradiente_azul", label: "Gradiente MSN" },
-  { id: "tileado_spacehey", label: "Tileado SpaceHey" },
-  { id: "grunge_tumblr", label: "Grunge Tumblr" },
+  { id: "gradiente_azul", label: "Gradiente" },
+  { id: "tileado_spacehey", label: "Pontilhado" },
+  { id: "grunge_tumblr", label: "Textura escura" },
 ] as const;
 
 export type BackgroundStyle = (typeof BACKGROUND_STYLES)[number]["id"];
@@ -17,9 +17,9 @@ export const BACKGROUND_STYLE_CLASSES: Record<BackgroundStyle, string> = {
 };
 
 export const BUTTON_STYLES = [
-  { id: "bevel", label: "Biselado (MSN)" },
-  { id: "glossy", label: "Glossy (SpaceHey)" },
-  { id: "grunge", label: "Grunge (Tumblr)" },
+  { id: "bevel", label: "Biselado" },
+  { id: "glossy", label: "Brilhante" },
+  { id: "grunge", label: "Fosco" },
 ] as const;
 
 export type ButtonStyle = (typeof BUTTON_STYLES)[number]["id"];

@@ -80,7 +80,7 @@ export async function updateProfile(
   }
 
   revalidatePath("/", "layout");
-  if (username) revalidatePath(`/usuarios/${username}`);
+  if (username) revalidatePath(`/${username}`);
 
   return { success: true };
 }
