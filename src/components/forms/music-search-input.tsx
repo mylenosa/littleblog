@@ -4,12 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { isMusicSearchConfigured, searchMusicCatalog } from "@/lib/actions/music-search";
+import { searchMusicCatalog } from "@/lib/actions/music-search";
 import type { SpotifySearchResult } from "@/lib/spotify";
 
 export function MusicSearchInput({
   id,
   type,
+  configured,
   value,
   spotifyId,
   onSelect,
@@ -19,22 +20,18 @@ export function MusicSearchInput({
 }: {
   id: string;
   type: "artist" | "track";
+  configured: boolean;
   value: string;
   spotifyId?: string;
-  onSelect: (name: string, spotifyId: string) => void;
+  onSelect: (name: string, spotifyId: string, subtitle: string) => void;
   onClear: () => void;
   onFreeTextChange: (value: string) => void;
   placeholder?: string;
 }) {
-  const [configured, setConfigured] = useState<boolean | null>(null);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SpotifySearchResult[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    isMusicSearchConfigured().then(setConfigured);
-  }, []);
 
   useEffect(() => {
     if (query.trim().length < 2) {
@@ -62,12 +59,6 @@ export function MusicSearchInput({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  // Ainda não sabemos se o Spotify está configurado: não renderiza nada
-  // piscando entre os dois modos.
-  if (configured === null) {
-    return <Input id={id} disabled value={value} readOnly placeholder="Carregando..." />;
-  }
 
   // Sem Spotify configurado: campo de texto comum, igual antes.
   if (!configured) {
@@ -127,7 +118,7 @@ export function MusicSearchInput({
                   type="button"
                   className="flex w-full flex-col px-3 py-2 text-left text-sm hover:bg-accent"
                   onClick={() => {
-                    onSelect(result.name, result.id);
+                    onSelect(result.name, result.id, result.subtitle);
                     setQuery("");
                     setIsOpen(false);
                   }}

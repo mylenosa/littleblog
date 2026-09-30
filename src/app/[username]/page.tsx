@@ -78,23 +78,15 @@ export default async function PublicProfilePage(
   ]);
   const hasContent = favorites.length > 0 || recentComments.length > 0;
 
-  const tickerItems: TickerItem[] = [];
-  if (profile.topArtist) {
-    tickerItems.push({
-      label: `🎤 Artista do momento: ${profile.topArtist}`,
-      href: profile.topArtistSpotifyId
-        ? `https://open.spotify.com/artist/${profile.topArtistSpotifyId}`
-        : undefined,
-    });
-  }
-  if (profile.topTrack) {
-    tickerItems.push({
-      label: `🎵 Favorita: ${profile.topTrack}`,
-      href: profile.topTrackSpotifyId
-        ? `https://open.spotify.com/track/${profile.topTrackSpotifyId}`
-        : undefined,
-    });
-  }
+  const nowPlayingLabel = [profile.topArtist, profile.topTrack].filter(Boolean).join(" — ");
+  const nowPlayingHref = profile.topTrackSpotifyId
+    ? `https://open.spotify.com/track/${profile.topTrackSpotifyId}`
+    : profile.topArtistSpotifyId
+      ? `https://open.spotify.com/artist/${profile.topArtistSpotifyId}`
+      : undefined;
+  const tickerItems: TickerItem[] = nowPlayingLabel
+    ? [{ label: `🎧 Ouvindo: ${nowPlayingLabel}`, href: nowPlayingHref }]
+    : [];
 
   return (
     <div

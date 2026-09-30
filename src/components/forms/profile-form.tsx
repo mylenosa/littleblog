@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -15,6 +15,7 @@ import { ImageDropzone } from "@/components/common/image-dropzone";
 import { PresetPicker } from "@/components/common/preset-picker";
 import { PresetVisual } from "@/components/common/preset-visual";
 import { MusicSearchInput } from "@/components/forms/music-search-input";
+import { isMusicSearchConfigured } from "@/lib/actions/music-search";
 import {
   AVATAR_PRESETS,
   isPresetValue,
@@ -68,6 +69,11 @@ export function ProfileForm({
   const [avatarTab, setAvatarTab] = useState<"upload" | "link" | "icone">(() =>
     initialAvatarTab(defaultValues.avatarUrl ?? "")
   );
+  const [musicConfigured, setMusicConfigured] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    isMusicSearchConfigured().then(setMusicConfigured);
+  }, []);
 
   const avatarUrl = watch("avatarUrl");
   const fullName = watch("fullName");
@@ -76,7 +82,6 @@ export function ProfileForm({
   const backgroundStyle = watch("backgroundStyle");
   const buttonStyle = watch("buttonStyle");
   const topArtist = watch("topArtist");
-  const topArtistSpotifyId = watch("topArtistSpotifyId");
   const topTrack = watch("topTrack");
   const topTrackSpotifyId = watch("topTrackSpotifyId");
 
@@ -279,45 +284,61 @@ export function ProfileForm({
         )}
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="topArtist">Artista do momento</Label>
-          <MusicSearchInput
-            id="topArtist"
-            type="artist"
-            placeholder="ex: Nebulosa Elétrica"
-            value={topArtist ?? ""}
-            spotifyId={topArtistSpotifyId || undefined}
-            onSelect={(name, spotifyId) => {
-              setValue("topArtist", name, { shouldDirty: true });
-              setValue("topArtistSpotifyId", spotifyId, { shouldDirty: true });
-            }}
-            onClear={() => {
-              setValue("topArtist", "", { shouldDirty: true });
-              setValue("topArtistSpotifyId", "", { shouldDirty: true });
-            }}
-            onFreeTextChange={(value) => setValue("topArtist", value, { shouldDirty: true })}
-          />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="topTrack">Música favorita</Label>
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="topTrack">Ouvindo agora</Label>
+        {musicConfigured === null && (
+          <Input id="topTrack" disabled value={topTrack ?? ""} readOnly placeholder="Carregando..." />
+        )}
+        {musicConfigured === false && (
+          <div className="grid gap-3 sm:grid-cols-2">
+            <MusicSearchInput
+              id="topArtist"
+              type="artist"
+              configured={false}
+              placeholder="Artista"
+              value={topArtist ?? ""}
+              onSelect={() => {}}
+              onClear={() => {}}
+              onFreeTextChange={(value) => setValue("topArtist", value, { shouldDirty: true })}
+            />
+            <MusicSearchInput
+              id="topTrack"
+              type="track"
+              configured={false}
+              placeholder="Música"
+              value={topTrack ?? ""}
+              onSelect={() => {}}
+              onClear={() => {}}
+              onFreeTextChange={(value) => setValue("topTrack", value, { shouldDirty: true })}
+            />
+          </div>
+        )}
+        {musicConfigured === true && (
           <MusicSearchInput
             id="topTrack"
             type="track"
+            configured
             placeholder="ex: Constelação"
-            value={topTrack ?? ""}
+            value={topArtist ? `${topArtist} — ${topTrack}` : (topTrack ?? "")}
             spotifyId={topTrackSpotifyId || undefined}
-            onSelect={(name, spotifyId) => {
+            onSelect={(name, spotifyId, subtitle) => {
               setValue("topTrack", name, { shouldDirty: true });
               setValue("topTrackSpotifyId", spotifyId, { shouldDirty: true });
+              setValue("topArtist", subtitle, { shouldDirty: true });
+              setValue("topArtistSpotifyId", "", { shouldDirty: true });
             }}
             onClear={() => {
               setValue("topTrack", "", { shouldDirty: true });
               setValue("topTrackSpotifyId", "", { shouldDirty: true });
+              setValue("topArtist", "", { shouldDirty: true });
+              setValue("topArtistSpotifyId", "", { shouldDirty: true });
             }}
-            onFreeTextChange={(value) => setValue("topTrack", value, { shouldDirty: true })}
+            onFreeTextChange={() => {}}
           />
-        </div>
+        )}
+        <p className="text-xs text-muted-foreground">
+          Aparece no banner do seu perfil, tipo &ldquo;ouvindo agora&rdquo;.
+        </p>
       </div>
 
       <div
