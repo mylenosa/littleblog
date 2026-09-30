@@ -74,7 +74,7 @@ export function ProfileForm({
   }
 
   return (
-    <div className="lg:grid lg:grid-cols-[1fr_380px] lg:items-start lg:gap-8">
+    <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-8">
       <form
         onSubmit={handleSubmit(onSubmit)}
         noValidate
@@ -349,7 +349,7 @@ export function ProfileForm({
         </Button>
       </form>
 
-      <div className="mt-8 hidden lg:sticky lg:top-20 lg:mt-0 lg:block">
+      <div className="mt-8 hidden min-w-0 lg:sticky lg:top-20 lg:mt-0 lg:block">
         <p className="mb-2 text-xs font-medium text-muted-foreground">
           Prévia ao vivo
         </p>

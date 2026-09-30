@@ -10,6 +10,7 @@ import {
   incrementProfileViews,
 } from "@/lib/queries/profile";
 import { getAuthState } from "@/lib/supabase/auth-state";
+import { BACKGROUND_STYLE_CLASSES } from "@/lib/constants/profile-themes";
 
 export async function generateMetadata(
   props: PageProps<"/[username]">
@@ -41,7 +42,21 @@ export default async function PublicProfilePage(
   const favorites = await getTopFavoriteArticles(profile.id);
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-neutral-100">
+    <div
+      className={`min-h-[calc(100vh-4rem)] ${BACKGROUND_STYLE_CLASSES[profile.backgroundStyle]}`}
+      style={
+        {
+          "--profile-accent": profile.accentColor,
+          ...(profile.backgroundImageUrl
+            ? {
+                backgroundImage: `url(${profile.backgroundImageUrl})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }
+            : {}),
+        } as React.CSSProperties
+      }
+    >
       <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
         {!profile.isPublic && isOwner && (
           <p className="mb-4 rounded-sm border border-dashed border-black/30 bg-white/80 px-3 py-2 text-xs text-neutral-700">

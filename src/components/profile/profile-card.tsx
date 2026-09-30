@@ -90,7 +90,7 @@ export function ProfileCard({
 
         {nowPlaying && (
           <div
-            className="mt-4 overflow-hidden whitespace-nowrap rounded-sm border border-dashed border-black/15 bg-black/5 py-1.5"
+            className="mt-4 min-w-0 overflow-hidden whitespace-nowrap rounded-sm border border-dashed border-black/15 bg-black/5 py-1.5"
             style={{
               maskImage:
                 "linear-gradient(to right, transparent, black 8%, black 92%, transparent)",
