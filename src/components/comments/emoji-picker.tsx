@@ -13,6 +13,7 @@ export function EmojiPicker({
   size = "icon-sm",
   className,
   children,
+  emojis = REACTION_EMOJIS,
 }: {
   onSelect: (emoji: string) => void;
   label: string;
@@ -20,6 +21,7 @@ export function EmojiPicker({
   size?: VariantProps<typeof buttonVariants>["size"];
   className?: string;
   children: React.ReactNode;
+  emojis?: readonly string[];
 }) {
   const [open, setOpen] = useState(false);
 
@@ -41,7 +43,7 @@ export function EmojiPicker({
       </PopoverTrigger>
       <PopoverContent className="w-auto p-2">
         <div className="grid grid-cols-6 gap-1">
-          {REACTION_EMOJIS.map((emoji) => (
+          {emojis.map((emoji) => (
             <button
               key={emoji}
               type="button"

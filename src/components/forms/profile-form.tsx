@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Smile, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +15,7 @@ import { ImageDropzone } from "@/components/common/image-dropzone";
 import { PresetPicker } from "@/components/common/preset-picker";
 import { PresetVisual } from "@/components/common/preset-visual";
 import { MusicSearchInput } from "@/components/forms/music-search-input";
+import { EmojiPicker } from "@/components/comments/emoji-picker";
 import { isMusicSearchConfigured } from "@/lib/actions/music-search";
 import {
   AVATAR_PRESETS,
@@ -22,6 +23,7 @@ import {
   presetIdFromValue,
   presetValueFromId,
 } from "@/lib/constants/image-presets";
+import { PROFILE_EMOJIS } from "@/lib/constants/emoji";
 import {
   BACKGROUND_STYLES,
   BACKGROUND_STYLE_CLASSES,
@@ -57,12 +59,36 @@ export function ProfileForm({
     handleSubmit,
     watch,
     setValue,
+    getValues,
     control,
     formState: { errors, isSubmitting },
   } = useForm<ProfileInput>({
     resolver: zodResolver(profileSchema),
     defaultValues,
   });
+
+  const bioRef = useRef<HTMLTextAreaElement | null>(null);
+  const statusRef = useRef<HTMLInputElement | null>(null);
+  const { ref: bioRegisterRef, ...bioField } = register("bio");
+  const { ref: statusRegisterRef, ...statusField } = register("status");
+
+  function insertEmoji(
+    field: "bio" | "status",
+    el: HTMLTextAreaElement | HTMLInputElement | null,
+    emoji: string
+  ) {
+    const current = getValues(field) || "";
+    const start = el?.selectionStart ?? current.length;
+    const end = el?.selectionEnd ?? current.length;
+
+    const next = current.slice(0, start) + emoji + current.slice(end);
+    setValue(field, next, { shouldDirty: true, shouldValidate: true });
+
+    requestAnimationFrame(() => {
+      el?.focus();
+      el?.setSelectionRange(start + emoji.length, start + emoji.length);
+    });
+  }
 
   const { fields, append, remove } = useFieldArray({ control, name: "links" });
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
@@ -164,15 +190,28 @@ export function ProfileForm({
 
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="status">Status</Label>
-        <Input
-          id="status"
-          placeholder="ex: 🎧 ouvindo música nova"
-          maxLength={40}
-          aria-invalid={!!errors.status}
-          {...register("status")}
-        />
+        <div className="flex items-center gap-2">
+          <Input
+            id="status"
+            placeholder="ex: ouvindo música nova"
+            maxLength={40}
+            aria-invalid={!!errors.status}
+            {...statusField}
+            ref={(el) => {
+              statusRegisterRef(el);
+              statusRef.current = el;
+            }}
+          />
+          <EmojiPicker
+            onSelect={(emoji) => insertEmoji("status", statusRef.current, emoji)}
+            label="Inserir emoji"
+            emojis={PROFILE_EMOJIS}
+          >
+            <Smile />
+          </EmojiPicker>
+        </div>
         <p className="text-xs text-muted-foreground">
-          Uma frase curta tipo MSN, aparece do lado do seu nome no perfil.
+          Uma frase curta de status, aparece do lado do seu nome no perfil.
         </p>
         {errors.status && (
           <p className="text-sm text-destructive">{errors.status.message}</p>
@@ -262,13 +301,26 @@ export function ProfileForm({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="bio">Bio</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="bio">Bio</Label>
+          <EmojiPicker
+            onSelect={(emoji) => insertEmoji("bio", bioRef.current, emoji)}
+            label="Inserir emoji"
+            emojis={PROFILE_EMOJIS}
+          >
+            <Smile />
+          </EmojiPicker>
+        </div>
         <Textarea
           id="bio"
           rows={7}
           maxLength={BIO_MAX_LENGTH}
           aria-invalid={!!errors.bio}
-          {...register("bio")}
+          {...bioField}
+          ref={(el) => {
+            bioRegisterRef(el);
+            bioRef.current = el;
+          }}
         />
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span>
