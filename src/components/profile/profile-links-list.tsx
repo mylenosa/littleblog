@@ -27,14 +27,16 @@ function platformLabel(platform: PublicProfileLink["platform"]) {
 export function ProfileLinksList({
   links,
   buttonStyle,
+  vertical = false,
 }: {
   links: PublicProfileLink[];
   buttonStyle: ButtonStyle;
+  vertical?: boolean;
 }) {
   if (links.length === 0) return null;
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className={vertical ? "flex flex-col gap-2" : "flex flex-wrap gap-2"}>
       {links.map((link) => {
         const Icon = PLATFORM_ICONS[link.platform];
         return (
@@ -43,7 +45,7 @@ export function ProfileLinksList({
             href={link.url}
             target="_blank"
             rel="noopener noreferrer nofollow"
-            className={`flex items-center gap-1.5 bg-[color:var(--profile-accent)] px-3 py-1.5 text-xs font-medium text-white ${BUTTON_STYLE_CLASSES[buttonStyle]}`}
+            className={`flex items-center gap-1.5 bg-[color:var(--profile-accent)] px-3 py-1.5 text-xs font-medium text-white ${vertical ? "justify-center" : ""} ${BUTTON_STYLE_CLASSES[buttonStyle]}`}
           >
             <Icon className="size-3.5" />
             {platformLabel(link.platform)}

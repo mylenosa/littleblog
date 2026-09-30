@@ -1,11 +1,19 @@
 import {
+  BoomBox,
+  CassetteTape,
+  Crown,
   Disc3,
+  DiscAlbum,
+  Gem,
   Guitar,
   Headphones,
   Mic2,
   Music2,
+  PartyPopper,
   PlayCircle,
   Radio,
+  Sparkles,
+  Videotape,
   Waves,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -31,8 +39,22 @@ export const IMAGE_PRESETS: ImagePreset[] = [
   { id: "play-primary", icon: PlayCircle, tone: "spotlight" },
 ];
 
+export const AVATAR_PRESETS: ImagePreset[] = [
+  { id: "cassette-primary", icon: CassetteTape, tone: "primary" },
+  { id: "boombox-spotlight", icon: BoomBox, tone: "spotlight" },
+  { id: "discalbum-primary", icon: DiscAlbum, tone: "spotlight" },
+  { id: "videotape-spotlight", icon: Videotape, tone: "primary" },
+  { id: "party-primary", icon: PartyPopper, tone: "spotlight" },
+  { id: "sparkles-spotlight", icon: Sparkles, tone: "primary" },
+  { id: "gem-primary", icon: Gem, tone: "spotlight" },
+  { id: "crown-spotlight", icon: Crown, tone: "primary" },
+];
+
 export function findPreset(id: string) {
-  return IMAGE_PRESETS.find((preset) => preset.id === id);
+  return (
+    IMAGE_PRESETS.find((preset) => preset.id === id) ??
+    AVATAR_PRESETS.find((preset) => preset.id === id)
+  );
 }
 
 export function isPresetValue(value: string | null | undefined) {

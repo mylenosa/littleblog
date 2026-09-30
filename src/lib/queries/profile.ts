@@ -73,6 +73,51 @@ export async function incrementProfileViews(username: string): Promise<void> {
 
 const TOP_FAVORITES_LIMIT = 8;
 
+export type RecentComment = {
+  id: string;
+  content: string;
+  createdAt: string;
+  articleSlug: string;
+  articleTitle: string;
+};
+
+const RECENT_COMMENTS_LIMIT = 5;
+
+export async function getRecentCommentsByUser(
+  profileId: string
+): Promise<RecentComment[]> {
+  const supabase = await createClient();
+
+  const { data: comments } = await supabase
+    .from("comments")
+    .select("id, content, created_at, article_slug")
+    .eq("user_id", profileId)
+    .order("created_at", { ascending: false })
+    .limit(RECENT_COMMENTS_LIMIT);
+
+  if (!comments || comments.length === 0) return [];
+
+  const { data: articles } = await supabase
+    .from("articles")
+    .select("slug, title")
+    .in(
+      "slug",
+      comments.map((c) => c.article_slug)
+    );
+
+  const titleBySlug = new Map((articles ?? []).map((a) => [a.slug, a.title]));
+
+  return comments
+    .filter((comment) => titleBySlug.has(comment.article_slug))
+    .map((comment) => ({
+      id: comment.id,
+      content: comment.content,
+      createdAt: comment.created_at,
+      articleSlug: comment.article_slug,
+      articleTitle: titleBySlug.get(comment.article_slug)!,
+    }));
+}
+
 export async function getTopFavoriteArticles(
   profileId: string
 ): Promise<Article[]> {

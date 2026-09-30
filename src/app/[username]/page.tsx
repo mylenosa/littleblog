@@ -2,10 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArticleCard } from "@/components/articles/article-card";
-import { ProfileCard } from "@/components/profile/profile-card";
+import { ProfileSidebar } from "@/components/profile/profile-sidebar";
+import { ProfileBio } from "@/components/profile/profile-bio";
+import { RecentCommentsList } from "@/components/profile/recent-comments-list";
 import { ReportProfileButton } from "@/components/profile/report-profile-button";
 import {
   getPublicProfileByUsername,
+  getRecentCommentsByUser,
   getTopFavoriteArticles,
   incrementProfileViews,
 } from "@/lib/queries/profile";
@@ -24,6 +27,11 @@ export async function generateMetadata(
   };
 }
 
+function cursorStyle(color: string) {
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20'><circle cx='10' cy='10' r='6' fill='${color}' stroke='white' stroke-width='2'/></svg>`;
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}") 10 10, auto`;
+}
+
 export default async function PublicProfilePage(
   props: PageProps<"/[username]">
 ) {
@@ -39,7 +47,11 @@ export default async function PublicProfilePage(
   if (!profile.isPublic && !isOwner) notFound();
 
   await incrementProfileViews(profile.username);
-  const favorites = await getTopFavoriteArticles(profile.id);
+  const [favorites, recentComments] = await Promise.all([
+    getTopFavoriteArticles(profile.id),
+    getRecentCommentsByUser(profile.id),
+  ]);
+  const hasContent = favorites.length > 0 || recentComments.length > 0;
 
   return (
     <div
@@ -47,6 +59,7 @@ export default async function PublicProfilePage(
       style={
         {
           "--profile-accent": profile.accentColor,
+          cursor: cursorStyle(profile.accentColor),
           ...(profile.backgroundImageUrl
             ? {
                 backgroundImage: `url(${profile.backgroundImageUrl})`,
@@ -57,7 +70,7 @@ export default async function PublicProfilePage(
         } as React.CSSProperties
       }
     >
-      <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
+      <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
         {!profile.isPublic && isOwner && (
           <p className="mb-4 rounded-sm border border-dashed border-black/30 bg-white/80 px-3 py-2 text-xs text-neutral-700">
             Seu perfil está marcado como privado — só você está vendo essa página.
@@ -69,35 +82,56 @@ export default async function PublicProfilePage(
           </p>
         )}
 
-        <ProfileCard
-          fullName={profile.fullName}
-          username={profile.username}
-          bio={profile.bio}
-          avatarUrl={profile.avatarUrl}
-          backgroundStyle={profile.backgroundStyle}
-          accentColor={profile.accentColor}
-          buttonStyle={profile.buttonStyle}
-          backgroundImageUrl={profile.backgroundImageUrl}
-          topArtist={profile.topArtist}
-          topTrack={profile.topTrack}
-          links={profile.links}
-          viewCount={profile.viewCount}
-          updatedAt={profile.updatedAt}
-          editHref={isOwner ? "/perfil" : undefined}
-        />
-
-        {favorites.length > 0 && (
-          <div className="mt-6 rounded-sm border-2 border-black/10 bg-white/90 p-6 shadow-lg backdrop-blur-sm">
-            <h2 className="mb-4 text-sm font-bold uppercase tracking-wide text-neutral-600">
-              Top favoritos
-            </h2>
-            <div className="grid gap-6 sm:grid-cols-2">
-              {favorites.map((article) => (
-                <ArticleCard key={article.slug} article={article} />
-              ))}
-            </div>
+        <div className="grid overflow-hidden rounded-sm border-2 border-black/10 bg-white/90 shadow-lg backdrop-blur-sm sm:grid-cols-[220px_1fr]">
+          <div
+            className="border-b border-dashed border-black/15 p-6 sm:border-r sm:border-b-0"
+            style={{
+              backgroundColor:
+                "color-mix(in srgb, var(--profile-accent) 10%, transparent)",
+            }}
+          >
+            <ProfileSidebar
+              fullName={profile.fullName}
+              username={profile.username}
+              avatarUrl={profile.avatarUrl}
+              buttonStyle={profile.buttonStyle}
+              topArtist={profile.topArtist}
+              topTrack={profile.topTrack}
+              links={profile.links}
+              viewCount={profile.viewCount}
+              updatedAt={profile.updatedAt}
+              editHref={isOwner ? "/perfil" : undefined}
+            />
           </div>
-        )}
+
+          <div className="flex flex-col gap-6 p-6">
+            {profile.bio && <ProfileBio bio={profile.bio} />}
+
+            {hasContent ? (
+              <>
+                {favorites.length > 0 && (
+                  <div>
+                    <h2 className="mb-4 text-sm font-bold uppercase tracking-wide text-neutral-600">
+                      Top favoritos
+                    </h2>
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      {favorites.map((article) => (
+                        <ArticleCard key={article.slug} article={article} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <RecentCommentsList comments={recentComments} />
+              </>
+            ) : (
+              <p className="rounded-sm border border-dashed border-black/15 p-4 text-sm text-neutral-500">
+                Ainda não tem nada por aqui — favorita um artigo ou comenta em
+                algum pra aparecer.
+              </p>
+            )}
+          </div>
+        </div>
 
         <div className="mt-4 text-center">
           <ReportProfileButton username={profile.username} />

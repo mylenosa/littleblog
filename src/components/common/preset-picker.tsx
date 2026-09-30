@@ -1,6 +1,6 @@
 "use client";
 
-import { IMAGE_PRESETS } from "@/lib/constants/image-presets";
+import { IMAGE_PRESETS, type ImagePreset } from "@/lib/constants/image-presets";
 import { PresetVisual } from "@/components/common/preset-visual";
 import { cn } from "@/lib/utils";
 
@@ -8,10 +8,12 @@ export function PresetPicker({
   value,
   onSelect,
   shape = "card",
+  presets = IMAGE_PRESETS,
 }: {
   value?: string;
   onSelect: (presetId: string) => void;
   shape?: "card" | "circle";
+  presets?: ImagePreset[];
 }) {
   return (
     <div
@@ -20,7 +22,7 @@ export function PresetPicker({
         shape === "circle" ? "grid-cols-8 sm:grid-cols-8" : "grid-cols-4 sm:grid-cols-8"
       )}
     >
-      {IMAGE_PRESETS.map((preset) => (
+      {presets.map((preset) => (
         <button
           key={preset.id}
           type="button"
