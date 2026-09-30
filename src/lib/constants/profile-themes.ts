@@ -16,6 +16,19 @@ export const BACKGROUND_STYLE_CLASSES: Record<BackgroundStyle, string> = {
   grunge_tumblr: "bg-neutral-900 bg-[url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2740%27 height=%2740%27%3E%3Cfilter id=%27n%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%270.9%27/%3E%3C/filter%3E%3Crect width=%2740%27 height=%2740%27 filter=%27url(%23n)%27 opacity=%270.08%27/%3E%3C/svg%3E')]",
 };
 
+// Tratamento mais opaco/saturado que BACKGROUND_STYLE_CLASSES, pensado pra
+// uma faixa pequena (banner) que precisa ficar sempre visivelmente diferente
+// do fundo da página atrás dela — os estilos "fracos" (solido, gradiente)
+// ficariam parecendo transparentes se reusassem a classe do fundo da página.
+export const BANNER_STYLE_CLASSES: Record<BackgroundStyle, string> = {
+  solido: "bg-[color-mix(in_srgb,var(--profile-accent)_45%,white)]",
+  gradiente_azul:
+    "bg-gradient-to-r from-[color-mix(in_srgb,var(--profile-accent)_75%,white)] to-[color-mix(in_srgb,var(--profile-accent)_35%,white)]",
+  tileado_spacehey:
+    "bg-[radial-gradient(circle,_color-mix(in_srgb,_var(--profile-accent)_45%,_transparent)_2px,_transparent_2px)] [background-size:16px_16px] bg-[color-mix(in_srgb,var(--profile-accent)_18%,white)]",
+  grunge_tumblr: BACKGROUND_STYLE_CLASSES.grunge_tumblr,
+};
+
 export const BUTTON_STYLES = [
   { id: "bevel", label: "Biselado" },
   { id: "glossy", label: "Brilhante" },

@@ -14,7 +14,10 @@ import {
   incrementProfileViews,
 } from "@/lib/queries/profile";
 import { getAuthState } from "@/lib/supabase/auth-state";
-import { BACKGROUND_STYLE_CLASSES } from "@/lib/constants/profile-themes";
+import {
+  BACKGROUND_STYLE_CLASSES,
+  BANNER_STYLE_CLASSES,
+} from "@/lib/constants/profile-themes";
 
 export async function generateMetadata(
   props: PageProps<"/[username]">
@@ -31,6 +34,26 @@ export async function generateMetadata(
 function cursorStyle(color: string) {
   const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20'><circle cx='10' cy='10' r='6' fill='${color}' stroke='white' stroke-width='2'/></svg>`;
   return `url("data:image/svg+xml,${encodeURIComponent(svg)}") 10 10, auto`;
+}
+
+type TickerItem = { label: string; href?: string };
+
+function TickerLink({ label, href, hidden }: TickerItem & { hidden?: boolean }) {
+  if (!href) {
+    return <span aria-hidden={hidden || undefined}>{label}</span>;
+  }
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer noopener"
+      className="hover:underline"
+      aria-hidden={hidden || undefined}
+      tabIndex={hidden ? -1 : undefined}
+    >
+      {label}
+    </a>
+  );
 }
 
 export default async function PublicProfilePage(
@@ -55,12 +78,23 @@ export default async function PublicProfilePage(
   ]);
   const hasContent = favorites.length > 0 || recentComments.length > 0;
 
-  const nowPlaying = [profile.topArtist, profile.topTrack].filter(Boolean).join(" — ");
-  const nowPlayingHref = profile.topTrackSpotifyId
-    ? `https://open.spotify.com/track/${profile.topTrackSpotifyId}`
-    : profile.topArtistSpotifyId
-      ? `https://open.spotify.com/artist/${profile.topArtistSpotifyId}`
-      : undefined;
+  const tickerItems: TickerItem[] = [];
+  if (profile.topArtist) {
+    tickerItems.push({
+      label: `🎤 Artista do momento: ${profile.topArtist}`,
+      href: profile.topArtistSpotifyId
+        ? `https://open.spotify.com/artist/${profile.topArtistSpotifyId}`
+        : undefined,
+    });
+  }
+  if (profile.topTrack) {
+    tickerItems.push({
+      label: `🎵 Favorita: ${profile.topTrack}`,
+      href: profile.topTrackSpotifyId
+        ? `https://open.spotify.com/track/${profile.topTrackSpotifyId}`
+        : undefined,
+    });
+  }
 
   return (
     <div
@@ -93,9 +127,9 @@ export default async function PublicProfilePage(
 
         <div className="overflow-hidden rounded-sm border-2 border-black/10 bg-white/90 shadow-lg backdrop-blur-sm transition-shadow duration-300 hover:shadow-[0_0_0_3px_color-mix(in_srgb,var(--profile-accent)_50%,transparent),0_12px_28px_-8px_color-mix(in_srgb,var(--profile-accent)_45%,transparent)]">
           <div
-            className={`relative h-28 sm:h-32 ${BACKGROUND_STYLE_CLASSES[profile.backgroundStyle]}`}
+            className={`relative h-28 sm:h-32 ${BANNER_STYLE_CLASSES[profile.backgroundStyle]}`}
           >
-            {nowPlaying && (
+            {tickerItems.length > 0 && (
               <div
                 className="absolute inset-x-0 bottom-0 overflow-hidden whitespace-nowrap bg-black/35 py-1.5 backdrop-blur-sm"
                 style={{
@@ -105,34 +139,17 @@ export default async function PublicProfilePage(
                     "linear-gradient(to right, transparent, black 8%, black 92%, transparent)",
                 }}
               >
-                <div className="inline-flex animate-[profile-marquee_14s_linear_infinite] gap-12 px-4 text-xs font-medium text-white">
-                  {nowPlayingHref ? (
-                    <>
-                      <a
-                        href={nowPlayingHref}
-                        target="_blank"
-                        rel="noreferrer noopener"
-                        className="hover:underline"
-                      >
-                        🎧 Ouvindo: {nowPlaying}
-                      </a>
-                      <a
-                        href={nowPlayingHref}
-                        target="_blank"
-                        rel="noreferrer noopener"
-                        aria-hidden="true"
-                        tabIndex={-1}
-                        className="hover:underline"
-                      >
-                        🎧 Ouvindo: {nowPlaying}
-                      </a>
-                    </>
-                  ) : (
-                    <>
-                      <span>🎧 Ouvindo: {nowPlaying}</span>
-                      <span aria-hidden="true">🎧 Ouvindo: {nowPlaying}</span>
-                    </>
-                  )}
+                <div className="inline-flex animate-[profile-marquee_14s_linear_infinite] gap-10 px-4 text-xs font-medium text-white">
+                  <span className="inline-flex items-center gap-10">
+                    {tickerItems.map((item) => (
+                      <TickerLink key={item.label} {...item} />
+                    ))}
+                  </span>
+                  <span className="inline-flex items-center gap-10" aria-hidden="true">
+                    {tickerItems.map((item) => (
+                      <TickerLink key={item.label} {...item} hidden />
+                    ))}
+                  </span>
                 </div>
               </div>
             )}
