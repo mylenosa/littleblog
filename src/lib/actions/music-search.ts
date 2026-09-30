@@ -2,6 +2,10 @@
 
 import { isSpotifyConfigured, searchSpotifyCatalog, type SpotifySearchResult } from "@/lib/spotify";
 
+export async function isMusicSearchConfigured(): Promise<boolean> {
+  return isSpotifyConfigured();
+}
+
 export async function searchMusicCatalog(
   query: string,
   type: "artist" | "track"

@@ -20,7 +20,10 @@ export type PublicProfile = {
   buttonStyle: ButtonStyle;
   backgroundImageUrl: string | null;
   topArtist: string | null;
+  topArtistSpotifyId: string | null;
   topTrack: string | null;
+  topTrackSpotifyId: string | null;
+  status: string | null;
   viewCount: number;
   updatedAt: string;
   links: PublicProfileLink[];
@@ -34,7 +37,7 @@ export async function getPublicProfileByUsername(
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "id, username, full_name, bio, avatar_url, is_public, background_style, accent_color, button_style, background_image_url, top_artist, top_track, profile_view_count, updated_at"
+      "id, username, full_name, bio, avatar_url, is_public, background_style, accent_color, button_style, background_image_url, top_artist, top_artist_spotify_id, top_track, top_track_spotify_id, status, profile_view_count, updated_at"
     )
     .eq("username", username.toLowerCase())
     .maybeSingle();
@@ -59,7 +62,10 @@ export async function getPublicProfileByUsername(
     buttonStyle: profile.button_style as ButtonStyle,
     backgroundImageUrl: profile.background_image_url,
     topArtist: profile.top_artist,
+    topArtistSpotifyId: profile.top_artist_spotify_id,
     topTrack: profile.top_track,
+    topTrackSpotifyId: profile.top_track_spotify_id,
+    status: profile.status,
     viewCount: profile.profile_view_count,
     updatedAt: profile.updated_at,
     links: (links ?? []) as PublicProfileLink[],
@@ -116,6 +122,16 @@ export async function getRecentCommentsByUser(
       articleSlug: comment.article_slug,
       articleTitle: titleBySlug.get(comment.article_slug)!,
     }));
+}
+
+export async function getCommentCountByUser(profileId: string): Promise<number> {
+  const supabase = await createClient();
+  const { count } = await supabase
+    .from("comments")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", profileId);
+
+  return count ?? 0;
 }
 
 export async function getTopFavoriteArticles(

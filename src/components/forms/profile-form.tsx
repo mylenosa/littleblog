@@ -76,7 +76,9 @@ export function ProfileForm({
   const backgroundStyle = watch("backgroundStyle");
   const buttonStyle = watch("buttonStyle");
   const topArtist = watch("topArtist");
+  const topArtistSpotifyId = watch("topArtistSpotifyId");
   const topTrack = watch("topTrack");
+  const topTrackSpotifyId = watch("topTrackSpotifyId");
 
   async function handleAvatarUpload(file: File) {
     setIsUploadingAvatar(true);
@@ -152,6 +154,23 @@ export function ProfileForm({
         </p>
         {errors.username && (
           <p className="text-sm text-destructive">{errors.username.message}</p>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="status">Status</Label>
+        <Input
+          id="status"
+          placeholder="ex: 🎧 ouvindo música nova"
+          maxLength={40}
+          aria-invalid={!!errors.status}
+          {...register("status")}
+        />
+        <p className="text-xs text-muted-foreground">
+          Uma frase curta tipo MSN, aparece do lado do seu nome no perfil.
+        </p>
+        {errors.status && (
+          <p className="text-sm text-destructive">{errors.status.message}</p>
         )}
       </div>
 
@@ -267,9 +286,17 @@ export function ProfileForm({
             id="topArtist"
             type="artist"
             placeholder="ex: Nebulosa Elétrica"
-            aria-invalid={!!errors.topArtist}
             value={topArtist ?? ""}
-            onChange={(value) => setValue("topArtist", value, { shouldDirty: true })}
+            spotifyId={topArtistSpotifyId || undefined}
+            onSelect={(name, spotifyId) => {
+              setValue("topArtist", name, { shouldDirty: true });
+              setValue("topArtistSpotifyId", spotifyId, { shouldDirty: true });
+            }}
+            onClear={() => {
+              setValue("topArtist", "", { shouldDirty: true });
+              setValue("topArtistSpotifyId", "", { shouldDirty: true });
+            }}
+            onFreeTextChange={(value) => setValue("topArtist", value, { shouldDirty: true })}
           />
         </div>
         <div className="flex flex-col gap-1.5">
@@ -278,9 +305,17 @@ export function ProfileForm({
             id="topTrack"
             type="track"
             placeholder="ex: Constelação"
-            aria-invalid={!!errors.topTrack}
             value={topTrack ?? ""}
-            onChange={(value) => setValue("topTrack", value, { shouldDirty: true })}
+            spotifyId={topTrackSpotifyId || undefined}
+            onSelect={(name, spotifyId) => {
+              setValue("topTrack", name, { shouldDirty: true });
+              setValue("topTrackSpotifyId", spotifyId, { shouldDirty: true });
+            }}
+            onClear={() => {
+              setValue("topTrack", "", { shouldDirty: true });
+              setValue("topTrackSpotifyId", "", { shouldDirty: true });
+            }}
+            onFreeTextChange={(value) => setValue("topTrack", value, { shouldDirty: true })}
           />
         </div>
       </div>

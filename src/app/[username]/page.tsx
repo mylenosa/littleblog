@@ -7,6 +7,7 @@ import { ProfileBio } from "@/components/profile/profile-bio";
 import { RecentCommentsList } from "@/components/profile/recent-comments-list";
 import { ReportProfileButton } from "@/components/profile/report-profile-button";
 import {
+  getCommentCountByUser,
   getPublicProfileByUsername,
   getRecentCommentsByUser,
   getTopFavoriteArticles,
@@ -47,11 +48,19 @@ export default async function PublicProfilePage(
   if (!profile.isPublic && !isOwner) notFound();
 
   await incrementProfileViews(profile.username);
-  const [favorites, recentComments] = await Promise.all([
+  const [favorites, recentComments, commentCount] = await Promise.all([
     getTopFavoriteArticles(profile.id),
     getRecentCommentsByUser(profile.id),
+    getCommentCountByUser(profile.id),
   ]);
   const hasContent = favorites.length > 0 || recentComments.length > 0;
+
+  const nowPlaying = [profile.topArtist, profile.topTrack].filter(Boolean).join(" — ");
+  const nowPlayingHref = profile.topTrackSpotifyId
+    ? `https://open.spotify.com/track/${profile.topTrackSpotifyId}`
+    : profile.topArtistSpotifyId
+      ? `https://open.spotify.com/artist/${profile.topArtistSpotifyId}`
+      : undefined;
 
   return (
     <div
@@ -82,54 +91,102 @@ export default async function PublicProfilePage(
           </p>
         )}
 
-        <div className="grid overflow-hidden rounded-sm border-2 border-black/10 bg-white/90 shadow-lg backdrop-blur-sm sm:grid-cols-[220px_1fr]">
+        <div className="overflow-hidden rounded-sm border-2 border-black/10 bg-white/90 shadow-lg backdrop-blur-sm transition-shadow duration-300 hover:shadow-[0_0_0_3px_color-mix(in_srgb,var(--profile-accent)_50%,transparent),0_12px_28px_-8px_color-mix(in_srgb,var(--profile-accent)_45%,transparent)]">
           <div
-            className="border-b border-dashed border-black/15 p-6 sm:border-r sm:border-b-0"
-            style={{
-              backgroundColor:
-                "color-mix(in srgb, var(--profile-accent) 10%, transparent)",
-            }}
+            className={`relative h-28 sm:h-32 ${BACKGROUND_STYLE_CLASSES[profile.backgroundStyle]}`}
           >
-            <ProfileSidebar
-              fullName={profile.fullName}
-              username={profile.username}
-              avatarUrl={profile.avatarUrl}
-              buttonStyle={profile.buttonStyle}
-              topArtist={profile.topArtist}
-              topTrack={profile.topTrack}
-              links={profile.links}
-              viewCount={profile.viewCount}
-              updatedAt={profile.updatedAt}
-              editHref={isOwner ? "/perfil" : undefined}
-            />
+            {nowPlaying && (
+              <div
+                className="absolute inset-x-0 bottom-0 overflow-hidden whitespace-nowrap bg-black/35 py-1.5 backdrop-blur-sm"
+                style={{
+                  maskImage:
+                    "linear-gradient(to right, transparent, black 8%, black 92%, transparent)",
+                  WebkitMaskImage:
+                    "linear-gradient(to right, transparent, black 8%, black 92%, transparent)",
+                }}
+              >
+                <div className="inline-flex animate-[profile-marquee_14s_linear_infinite] gap-12 px-4 text-xs font-medium text-white">
+                  {nowPlayingHref ? (
+                    <>
+                      <a
+                        href={nowPlayingHref}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        className="hover:underline"
+                      >
+                        🎧 Ouvindo: {nowPlaying}
+                      </a>
+                      <a
+                        href={nowPlayingHref}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        aria-hidden="true"
+                        tabIndex={-1}
+                        className="hover:underline"
+                      >
+                        🎧 Ouvindo: {nowPlaying}
+                      </a>
+                    </>
+                  ) : (
+                    <>
+                      <span>🎧 Ouvindo: {nowPlaying}</span>
+                      <span aria-hidden="true">🎧 Ouvindo: {nowPlaying}</span>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
-          <div className="flex flex-col gap-6 p-6">
-            {profile.bio && <ProfileBio bio={profile.bio} />}
+          <div className="grid sm:grid-cols-[220px_1fr]">
+            <div
+              className="border-b border-dashed border-black/15 p-6 sm:border-r sm:border-b-0"
+              style={{
+                backgroundColor:
+                  "color-mix(in srgb, var(--profile-accent) 10%, transparent)",
+              }}
+            >
+              <ProfileSidebar
+                fullName={profile.fullName}
+                username={profile.username}
+                avatarUrl={profile.avatarUrl}
+                buttonStyle={profile.buttonStyle}
+                status={profile.status}
+                links={profile.links}
+                viewCount={profile.viewCount}
+                updatedAt={profile.updatedAt}
+                commentCount={commentCount}
+                editHref={isOwner ? "/perfil" : undefined}
+              />
+            </div>
 
-            {hasContent ? (
-              <>
-                {favorites.length > 0 && (
-                  <div>
-                    <h2 className="mb-4 text-sm font-bold uppercase tracking-wide text-neutral-600">
-                      Top favoritos
-                    </h2>
-                    <div className="grid gap-6 sm:grid-cols-2">
-                      {favorites.map((article) => (
-                        <ArticleCard key={article.slug} article={article} />
-                      ))}
+            <div className="flex flex-col gap-6 p-6">
+              {profile.bio && <ProfileBio bio={profile.bio} />}
+
+              {hasContent ? (
+                <>
+                  {favorites.length > 0 && (
+                    <div>
+                      <h2 className="mb-4 text-sm font-bold uppercase tracking-wide text-neutral-600">
+                        Top favoritos
+                      </h2>
+                      <div className="grid gap-6 sm:grid-cols-2">
+                        {favorites.map((article) => (
+                          <ArticleCard key={article.slug} article={article} />
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                <RecentCommentsList comments={recentComments} />
-              </>
-            ) : (
-              <p className="rounded-sm border border-dashed border-black/15 p-4 text-sm text-neutral-500">
-                Ainda não tem nada por aqui — favorita um artigo ou comenta em
-                algum pra aparecer.
-              </p>
-            )}
+                  <RecentCommentsList comments={recentComments} />
+                </>
+              ) : (
+                <p className="rounded-sm border border-dashed border-black/15 p-4 text-sm text-neutral-500">
+                  Ainda não tem nada por aqui — favorita um artigo ou comenta em
+                  algum pra aparecer.
+                </p>
+              )}
+            </div>
           </div>
         </div>
 

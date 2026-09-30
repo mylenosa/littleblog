@@ -61,7 +61,10 @@ export const profileSchema = z.object({
   buttonStyle: z.enum(["bevel", "glossy", "grunge"]),
   backgroundImageUrl: urlOrEmpty,
   topArtist: z.string().trim().max(80, "Máximo de 80 caracteres.").optional(),
+  topArtistSpotifyId: z.string().trim().optional(),
   topTrack: z.string().trim().max(80, "Máximo de 80 caracteres.").optional(),
+  topTrackSpotifyId: z.string().trim().optional(),
+  status: z.string().trim().max(40, "Máximo de 40 caracteres.").optional(),
   links: z.array(profileLinkSchema).max(12, "No máximo 12 links."),
 });
 

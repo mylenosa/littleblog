@@ -11,34 +11,37 @@ export function ProfileSidebar({
   username,
   avatarUrl,
   buttonStyle,
-  topArtist,
-  topTrack,
+  status,
   links,
   viewCount,
   updatedAt,
+  commentCount,
   editHref,
 }: {
   fullName: string;
   username: string;
   avatarUrl?: string | null;
   buttonStyle: ButtonStyle;
-  topArtist?: string | null;
-  topTrack?: string | null;
+  status?: string | null;
   links: PublicProfileLink[];
   viewCount?: number;
   updatedAt?: string;
+  commentCount?: number;
   editHref?: string;
 }) {
-  const nowPlaying = [topArtist, topTrack].filter(Boolean).join(" — ");
-
   return (
     <div className="flex h-full flex-col">
-      <Avatar size="lg" className="size-20">
+      <Avatar
+        className="-mt-20 size-28 border-4 border-photo-border shadow-md"
+      >
         <AvatarImage src={avatarUrl ?? undefined} alt="" />
         <AvatarFallback>{initials(fullName)}</AvatarFallback>
       </Avatar>
       <h1 className="mt-3 text-xl font-bold">{fullName}</h1>
       <p className="text-sm text-neutral-500">@{username}</p>
+      {status && (
+        <p className="mt-1 text-xs italic text-neutral-500">{status}</p>
+      )}
 
       {editHref && (
         <Link
@@ -47,23 +50,6 @@ export function ProfileSidebar({
         >
           Editar perfil
         </Link>
-      )}
-
-      {nowPlaying && (
-        <div
-          className="mt-4 min-w-0 overflow-hidden whitespace-nowrap rounded-sm border border-dashed border-black/15 bg-black/5 py-1.5"
-          style={{
-            maskImage:
-              "linear-gradient(to right, transparent, black 8%, black 92%, transparent)",
-            WebkitMaskImage:
-              "linear-gradient(to right, transparent, black 8%, black 92%, transparent)",
-          }}
-        >
-          <div className="inline-flex animate-[profile-marquee_14s_linear_infinite] gap-12 text-xs font-medium text-neutral-700">
-            <span>🎧 Ouvindo: {nowPlaying}</span>
-            <span aria-hidden="true">🎧 Ouvindo: {nowPlaying}</span>
-          </div>
-        </div>
       )}
 
       <div className="mt-4">
@@ -76,6 +62,12 @@ export function ProfileSidebar({
             <span>Visitante nº {viewCount.toLocaleString("pt-BR")}</span>
             <span>Visto por último em {formatDate(updatedAt)}</span>
           </>
+        )}
+        {commentCount !== undefined && commentCount > 0 && (
+          <span>
+            {commentCount.toLocaleString("pt-BR")}{" "}
+            {commentCount === 1 ? "comentário feito" : "comentários feitos"}
+          </span>
         )}
       </div>
     </div>

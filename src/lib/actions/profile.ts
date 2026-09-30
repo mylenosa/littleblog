@@ -52,7 +52,10 @@ export async function updateProfile(
       button_style: parsed.data.buttonStyle,
       background_image_url: parsed.data.backgroundImageUrl || null,
       top_artist: parsed.data.topArtist || null,
+      top_artist_spotify_id: parsed.data.topArtistSpotifyId || null,
       top_track: parsed.data.topTrack || null,
+      top_track_spotify_id: parsed.data.topTrackSpotifyId || null,
+      status: parsed.data.status || null,
     })
     .eq("id", user.id);
 

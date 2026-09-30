@@ -260,8 +260,11 @@ export type Database = {
           is_editor: boolean
           is_public: boolean
           profile_view_count: number
+          status: string | null
           top_artist: string | null
+          top_artist_spotify_id: string | null
           top_track: string | null
+          top_track_spotify_id: string | null
           updated_at: string
           username: string | null
         }
@@ -279,8 +282,11 @@ export type Database = {
           is_editor?: boolean
           is_public?: boolean
           profile_view_count?: number
+          status?: string | null
           top_artist?: string | null
+          top_artist_spotify_id?: string | null
           top_track?: string | null
+          top_track_spotify_id?: string | null
           updated_at?: string
           username?: string | null
         }
@@ -298,8 +304,11 @@ export type Database = {
           is_editor?: boolean
           is_public?: boolean
           profile_view_count?: number
+          status?: string | null
           top_artist?: string | null
+          top_artist_spotify_id?: string | null
           top_track?: string | null
+          top_track_spotify_id?: string | null
           updated_at?: string
           username?: string | null
         }
