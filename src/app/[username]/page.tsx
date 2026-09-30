@@ -43,8 +43,9 @@ export async function generateMetadata(
   const title = `@${profile.username}`;
   const cardTitle = `${profile.fullName} (@${profile.username})`;
   const bioText = profile.bio ? stripMarkdown(profile.bio) : "";
+  const combinedText = [profile.status, bioText].filter(Boolean).join(" — ");
   const description =
-    [profile.status, bioText].filter(Boolean).join(" — ").slice(0, 160) ||
+    (combinedText.length > 125 ? `${combinedText.slice(0, 124)}…` : combinedText) ||
     `Confira o perfil de @${profile.username} no Quarto.`;
   const images =
     profile.avatarUrl && !isPresetValue(profile.avatarUrl)
