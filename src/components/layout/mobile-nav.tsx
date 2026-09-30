@@ -57,7 +57,7 @@ export function MobileNav({
             {user ? (
               <>
                 <Link
-                  href="/perfil"
+                  href={profile?.username ? `/${profile.username}` : "/perfil"}
                   onClick={() => setOpen(false)}
                   className="flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium hover:bg-accent"
                 >
