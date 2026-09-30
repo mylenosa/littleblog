@@ -48,7 +48,7 @@ export const BUTTON_STYLE_CLASSES: Record<ButtonStyle, string> = {
 export const LINK_PLATFORMS = [
   { id: "spotify", label: "Spotify" },
   { id: "instagram", label: "Instagram" },
-  { id: "x", label: "X" },
+  { id: "x", label: "X (Twitter)" },
   { id: "tiktok", label: "TikTok" },
   { id: "youtube", label: "YouTube" },
   { id: "lastfm", label: "Last.fm" },
