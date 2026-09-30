@@ -59,6 +59,7 @@ import {
 import { createArticle, deleteArticle, updateArticle } from "@/lib/actions/admin";
 import { createClient } from "@/lib/supabase/client";
 import { slugify } from "@/lib/slugify";
+import { datetimeLocalToIso, isoToDatetimeLocal } from "@/lib/datetime-local";
 
 const WORDS_PER_MINUTE = 200;
 
@@ -93,7 +94,10 @@ export function ArticleForm({
     formState: { errors, isSubmitting },
   } = useForm<ArticleFormInput>({
     resolver: zodResolver(articleFormSchema),
-    defaultValues,
+    defaultValues: {
+      ...defaultValues,
+      publishedAt: isoToDatetimeLocal(defaultValues.publishedAt),
+    },
   });
 
   const { ref: contentRegisterRef, ...contentField } = register("content");
@@ -199,10 +203,14 @@ export function ArticleForm({
   }
 
   async function onSubmit(data: ArticleFormInput) {
+    const payload = {
+      ...data,
+      publishedAt: datetimeLocalToIso(data.publishedAt),
+    };
     const result =
       mode === "create"
-        ? await createArticle(data)
-        : await updateArticle(originalSlug!, data);
+        ? await createArticle(payload)
+        : await updateArticle(originalSlug!, payload);
 
     if (result.success) {
       toast.success(mode === "create" ? "Artigo criado." : "Artigo atualizado.");
@@ -287,10 +295,12 @@ export function ArticleForm({
               )}
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="publishedAt">Data de publicação</Label>
+              <Label htmlFor="publishedAt">
+                Data e hora de publicação (horário de Brasília)
+              </Label>
               <Input
                 id="publishedAt"
-                type="date"
+                type="datetime-local"
                 aria-invalid={!!errors.publishedAt}
                 {...register("publishedAt")}
               />
@@ -534,7 +544,11 @@ export function ArticleForm({
               </p>
               <ArticleMeta
                 authorName={authorName || "Autor"}
-                publishedAt={publishedAt || new Date().toISOString().slice(0, 10)}
+                publishedAt={
+                  publishedAt
+                    ? datetimeLocalToIso(publishedAt)
+                    : new Date().toISOString()
+                }
                 readingTimeMinutes={estimateReadingTime(content || "")}
               />
               <ArticleCover

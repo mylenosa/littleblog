@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { TagBadge } from "@/components/articles/tag-badge";
 import { setFeatured, updateFeaturedPosition } from "@/lib/actions/admin";
 import type { ArticleMeta } from "@/lib/queries/articles";
@@ -58,6 +59,7 @@ export function FeaturedArticlesManager({
     <div className="flex flex-col gap-3">
       {articles.map((article) => {
         const isFeatured = article.slug in featured;
+        const isScheduled = new Date(article.publishedAt) > new Date();
         return (
           <div
             key={article.slug}
@@ -71,6 +73,9 @@ export function FeaturedArticlesManager({
                 {article.title}
               </Link>
               <div className="flex flex-wrap items-center gap-1.5">
+                {isScheduled && (
+                  <Badge variant="secondary">Agendado</Badge>
+                )}
                 {article.tags.slice(0, 3).map((tag) => (
                   <TagBadge key={tag} tag={tag} />
                 ))}

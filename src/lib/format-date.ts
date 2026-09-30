@@ -5,5 +5,5 @@ const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
 });
 
 export function formatDate(isoDate: string) {
-  return dateFormatter.format(new Date(`${isoDate}T00:00:00`));
+  return dateFormatter.format(new Date(isoDate));
 }

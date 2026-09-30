@@ -48,7 +48,7 @@ function toArticle(row: ArticleRow): Article {
     tags: row.tags,
     authorName: row.author_name,
     coverImageUrl: row.cover_image_url,
-    publishedAt: row.published_at.slice(0, 10),
+    publishedAt: row.published_at,
     featured: row.featured,
     featuredPosition: row.featured_position,
     readingTimeMinutes: readingTime(row.content),

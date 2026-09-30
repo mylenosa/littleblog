@@ -7,8 +7,8 @@ export const metadata: Metadata = {
   title: "Novo artigo",
 };
 
-function todayIso() {
-  return new Date().toISOString().slice(0, 10);
+function nowIso() {
+  return new Date().toISOString();
 }
 
 export default async function NovoArtigoPage() {
@@ -30,7 +30,7 @@ export default async function NovoArtigoPage() {
           tags: "",
           authorName: profile?.fullName ?? "",
           coverImageUrl: "",
-          publishedAt: todayIso(),
+          publishedAt: nowIso(),
         }}
       />
     </div>
