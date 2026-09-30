@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PresetPicker } from "@/components/common/preset-picker";
 import { PresetVisual } from "@/components/common/preset-visual";
+import { ProfileCard } from "@/components/profile/profile-card";
 import {
   isPresetValue,
   presetIdFromValue,
@@ -25,18 +26,12 @@ import {
 } from "@/lib/constants/profile-themes";
 import { profileSchema, type ProfileInput } from "@/lib/validations/profile.schema";
 import { updateProfile } from "@/lib/actions/profile";
+import { initials } from "@/lib/initials";
+
+const BIO_MAX_LENGTH = 500;
 
 const selectClassName =
   "h-9 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50";
-
-function initials(name: string) {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
-}
 
 export function ProfileForm({
   defaultValues,
@@ -59,9 +54,15 @@ export function ProfileForm({
 
   const avatarUrl = watch("avatarUrl");
   const fullName = watch("fullName");
+  const username = watch("username");
+  const bio = watch("bio");
   const accentColor = watch("accentColor");
   const backgroundStyle = watch("backgroundStyle");
   const buttonStyle = watch("buttonStyle");
+  const backgroundImageUrl = watch("backgroundImageUrl");
+  const topArtist = watch("topArtist");
+  const topTrack = watch("topTrack");
+  const watchedLinks = watch("links");
 
   async function onSubmit(data: ProfileInput) {
     const result = await updateProfile(data);
@@ -73,242 +74,303 @@ export function ProfileForm({
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-5">
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="fullName">Nome</Label>
-        <Input
-          id="fullName"
-          autoComplete="name"
-          aria-invalid={!!errors.fullName}
-          {...register("fullName")}
-        />
-        {errors.fullName && (
-          <p className="text-sm text-destructive">{errors.fullName.message}</p>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="username">Nome de usuário</Label>
-        <div className="flex items-center gap-1">
-          <span className="text-sm text-muted-foreground">/</span>
-          <Input
-            id="username"
-            placeholder="seu_nome"
-            aria-invalid={!!errors.username}
-            {...register("username")}
-          />
-        </div>
-        <p className="text-xs text-muted-foreground">
-          Trocar o nome de usuário depois quebra links antigos pro seu perfil.
-        </p>
-        {errors.username && (
-          <p className="text-sm text-destructive">{errors.username.message}</p>
-        )}
-      </div>
-
-      <label className="flex items-start gap-2 text-sm">
-        <input type="checkbox" className="mt-0.5" {...register("isPublic")} />
-        <span>
-          <span className="font-medium">Perfil visível publicamente</span>
-          <br />
-          <span className="text-xs text-muted-foreground">
-            Se desligar, ninguém consegue abrir seu perfil pelo link nem pelos
-            comentários (seu nome continua aparecendo, só não vira link).
-          </span>
-        </span>
-      </label>
-
-      <div className="flex flex-col gap-2">
-        <Label>Avatar</Label>
-        <div className="flex items-center gap-3">
-          {avatarUrl && isPresetValue(avatarUrl) ? (
-            <PresetVisual presetId={presetIdFromValue(avatarUrl)} shape="circle" className="size-14" />
-          ) : (
-            <Avatar size="lg">
-              <AvatarImage src={avatarUrl || undefined} alt="" />
-              <AvatarFallback>{initials(fullName || "?")}</AvatarFallback>
-            </Avatar>
-          )}
-          <Input
-            id="avatarUrl"
-            type="url"
-            placeholder="ou cole a URL de uma imagem"
-            aria-invalid={!!errors.avatarUrl}
-            {...register("avatarUrl")}
-          />
-        </div>
-        {errors.avatarUrl && (
-          <p className="text-sm text-destructive">{errors.avatarUrl.message}</p>
-        )}
-        <p className="mt-1 text-xs text-muted-foreground">
-          Ou escolha um avatar padrão:
-        </p>
-        <PresetPicker
-          shape="circle"
-          value={avatarUrl && isPresetValue(avatarUrl) ? presetIdFromValue(avatarUrl) : undefined}
-          onSelect={(id) =>
-            setValue("avatarUrl", presetValueFromId(id), { shouldDirty: true })
-          }
-        />
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="bio">Bio</Label>
-        <Textarea id="bio" rows={4} aria-invalid={!!errors.bio} {...register("bio")} />
-        <p className="text-xs text-muted-foreground">
-          Suporta Markdown — cole um link de imagem/GIF pra ilustrar, tipo{" "}
-          <code>![legenda](https://...)</code>.
-        </p>
-        {errors.bio && (
-          <p className="text-sm text-destructive">{errors.bio.message}</p>
-        )}
-      </div>
-
-      <div
-        className="rounded-lg border border-dashed border-border p-4"
-        style={{ "--profile-accent": accentColor } as React.CSSProperties}
+    <div className="lg:grid lg:grid-cols-[1fr_380px] lg:items-start lg:gap-8">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        noValidate
+        className="flex flex-col gap-5"
       >
-        <h3 className="mb-3 text-sm font-semibold">Aparência do perfil</h3>
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <Label>Fundo</Label>
-            <div className="flex flex-wrap gap-2">
-              {BACKGROUND_STYLES.map((style) => (
-                <button
-                  key={style.id}
-                  type="button"
-                  onClick={() =>
-                    setValue("backgroundStyle", style.id, { shouldDirty: true })
-                  }
-                  className={`flex flex-col items-center gap-1 rounded-md border-2 p-1 text-xs ${
-                    backgroundStyle === style.id
-                      ? "border-primary"
-                      : "border-transparent"
-                  }`}
-                >
-                  <span
-                    className={`size-10 rounded-sm border border-border ${BACKGROUND_STYLE_CLASSES[style.id]}`}
-                    aria-hidden="true"
-                  />
-                  {style.label}
-                </button>
-              ))}
-            </div>
-          </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="fullName">Nome</Label>
+          <Input
+            id="fullName"
+            autoComplete="name"
+            aria-invalid={!!errors.fullName}
+            {...register("fullName")}
+          />
+          {errors.fullName && (
+            <p className="text-sm text-destructive">{errors.fullName.message}</p>
+          )}
+        </div>
 
-          <div className="flex flex-col gap-1.5">
-            <Label>Estilo de botão</Label>
-            <div className="flex flex-wrap gap-2">
-              {BUTTON_STYLES.map((style) => (
-                <button
-                  key={style.id}
-                  type="button"
-                  onClick={() =>
-                    setValue("buttonStyle", style.id, { shouldDirty: true })
-                  }
-                  className={`flex flex-col items-center gap-1 rounded-md border-2 p-1 text-xs ${
-                    buttonStyle === style.id ? "border-primary" : "border-transparent"
-                  }`}
-                >
-                  <span
-                    className={`flex h-6 w-14 items-center justify-center bg-neutral-400 ${BUTTON_STYLE_CLASSES[style.id]}`}
-                    aria-hidden="true"
-                  />
-                  {style.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="accentColor">Cor de destaque</Label>
-            <div className="flex items-center gap-2">
-              <input
-                id="accentColor"
-                type="color"
-                className="size-9 rounded-md border border-input"
-                {...register("accentColor")}
-              />
-              <span className="text-sm text-muted-foreground">{accentColor}</span>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="backgroundImageUrl">Imagem de fundo (opcional)</Label>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="username">Nome de usuário</Label>
+          <div className="flex items-center gap-1">
+            <span className="text-sm text-muted-foreground">/</span>
             <Input
-              id="backgroundImageUrl"
+              id="username"
+              placeholder="seu_nome"
+              aria-invalid={!!errors.username}
+              {...register("username")}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Trocar o nome de usuário depois quebra links antigos pro seu perfil.
+          </p>
+          {errors.username && (
+            <p className="text-sm text-destructive">{errors.username.message}</p>
+          )}
+        </div>
+
+        <label className="flex items-start gap-2 text-sm">
+          <input type="checkbox" className="mt-0.5" {...register("isPublic")} />
+          <span>
+            <span className="font-medium">Perfil visível publicamente</span>
+            <br />
+            <span className="text-xs text-muted-foreground">
+              Se desligar, ninguém consegue abrir seu perfil pelo link nem pelos
+              comentários (seu nome continua aparecendo, só não vira link).
+            </span>
+          </span>
+        </label>
+
+        <div className="flex flex-col gap-2">
+          <Label>Avatar</Label>
+          <div className="flex items-center gap-3">
+            {avatarUrl && isPresetValue(avatarUrl) ? (
+              <PresetVisual presetId={presetIdFromValue(avatarUrl)} shape="circle" className="size-14" />
+            ) : (
+              <Avatar size="lg">
+                <AvatarImage src={avatarUrl || undefined} alt="" />
+                <AvatarFallback>{initials(fullName || "?")}</AvatarFallback>
+              </Avatar>
+            )}
+            <Input
+              id="avatarUrl"
               type="url"
-              placeholder="cole a URL de uma imagem"
-              aria-invalid={!!errors.backgroundImageUrl}
-              {...register("backgroundImageUrl")}
+              placeholder="ou cole a URL de uma imagem"
+              aria-invalid={!!errors.avatarUrl}
+              {...register("avatarUrl")}
+            />
+          </div>
+          {errors.avatarUrl && (
+            <p className="text-sm text-destructive">{errors.avatarUrl.message}</p>
+          )}
+          <p className="mt-1 text-xs text-muted-foreground">
+            Ou escolha um avatar padrão:
+          </p>
+          <PresetPicker
+            shape="circle"
+            value={avatarUrl && isPresetValue(avatarUrl) ? presetIdFromValue(avatarUrl) : undefined}
+            onSelect={(id) =>
+              setValue("avatarUrl", presetValueFromId(id), { shouldDirty: true })
+            }
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="bio">Bio</Label>
+          <Textarea
+            id="bio"
+            rows={7}
+            maxLength={BIO_MAX_LENGTH}
+            aria-invalid={!!errors.bio}
+            {...register("bio")}
+          />
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>
+              Suporta Markdown — cole um link de imagem/GIF pra ilustrar, tipo{" "}
+              <code>![legenda](https://...)</code>.
+            </span>
+            <span className="shrink-0">
+              {(bio ?? "").length}/{BIO_MAX_LENGTH}
+            </span>
+          </div>
+          {errors.bio && (
+            <p className="text-sm text-destructive">{errors.bio.message}</p>
+          )}
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="topArtist">Artista do momento</Label>
+            <Input
+              id="topArtist"
+              placeholder="ex: Nebulosa Elétrica"
+              aria-invalid={!!errors.topArtist}
+              {...register("topArtist")}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="topTrack">Música favorita</Label>
+            <Input
+              id="topTrack"
+              placeholder="ex: Constelação"
+              aria-invalid={!!errors.topTrack}
+              {...register("topTrack")}
             />
           </div>
         </div>
-      </div>
 
-      <div className="flex flex-col gap-2">
-        <Label>Links</Label>
-        {fields.map((field, index) => (
-          <div key={field.id} className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <div className="flex items-center gap-2">
-              <select
-                className={`${selectClassName} flex-1 sm:w-auto sm:flex-none`}
-                {...register(`links.${index}.platform` as const)}
-              >
-                {LINK_PLATFORMS.map((platform) => (
-                  <option key={platform.id} value={platform.id}>
-                    {platform.label}
-                  </option>
+        <div
+          className="rounded-lg border border-dashed border-border p-4"
+          style={{ "--profile-accent": accentColor } as React.CSSProperties}
+        >
+          <h3 className="mb-3 text-sm font-semibold">Aparência do perfil</h3>
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <Label>Fundo</Label>
+              <div className="flex flex-wrap gap-2">
+                {BACKGROUND_STYLES.map((style) => (
+                  <button
+                    key={style.id}
+                    type="button"
+                    onClick={() =>
+                      setValue("backgroundStyle", style.id, { shouldDirty: true })
+                    }
+                    className={`flex flex-col items-center gap-1 rounded-md border-2 p-1 text-xs ${
+                      backgroundStyle === style.id
+                        ? "border-primary"
+                        : "border-transparent"
+                    }`}
+                  >
+                    <span
+                      className={`size-10 rounded-sm border border-border ${BACKGROUND_STYLE_CLASSES[style.id]}`}
+                      aria-hidden="true"
+                    />
+                    {style.label}
+                  </button>
                 ))}
-              </select>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                aria-label="Remover link"
-                className="shrink-0 sm:hidden"
-                onClick={() => remove(index)}
-              >
-                <Trash2 className="size-4" />
-              </Button>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
+
+            <div className="flex flex-col gap-1.5">
+              <Label>Estilo de botão</Label>
+              <div className="flex flex-wrap gap-2">
+                {BUTTON_STYLES.map((style) => (
+                  <button
+                    key={style.id}
+                    type="button"
+                    onClick={() =>
+                      setValue("buttonStyle", style.id, { shouldDirty: true })
+                    }
+                    className={`flex flex-col items-center gap-1 rounded-md border-2 p-1 text-xs ${
+                      buttonStyle === style.id ? "border-primary" : "border-transparent"
+                    }`}
+                  >
+                    <span
+                      className={`flex h-6 w-14 items-center justify-center bg-neutral-400 ${BUTTON_STYLE_CLASSES[style.id]}`}
+                      aria-hidden="true"
+                    />
+                    {style.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="accentColor">Cor de destaque</Label>
+              <div className="flex items-center gap-2">
+                <input
+                  id="accentColor"
+                  type="color"
+                  className="size-9 rounded-md border border-input"
+                  {...register("accentColor")}
+                />
+                <span className="text-sm text-muted-foreground">{accentColor}</span>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="backgroundImageUrl">Imagem de fundo (opcional)</Label>
               <Input
+                id="backgroundImageUrl"
                 type="url"
-                placeholder="https://..."
-                aria-invalid={!!errors.links?.[index]?.url}
-                {...register(`links.${index}.url` as const)}
+                placeholder="cole a URL de uma imagem"
+                aria-invalid={!!errors.backgroundImageUrl}
+                {...register("backgroundImageUrl")}
               />
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                aria-label="Remover link"
-                className="hidden shrink-0 sm:inline-flex"
-                onClick={() => remove(index)}
-              >
-                <Trash2 className="size-4" />
-              </Button>
             </div>
           </div>
-        ))}
-        {errors.links && typeof errors.links.message === "string" && (
-          <p className="text-sm text-destructive">{errors.links.message}</p>
-        )}
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="self-start"
-          onClick={() => append({ platform: "spotify", url: "" })}
-        >
-          <Plus className="size-4" /> Adicionar link
-        </Button>
-      </div>
+        </div>
 
-      <Button type="submit" disabled={isSubmitting} className="self-start">
-        {isSubmitting ? "Salvando..." : "Salvar alterações"}
-      </Button>
-    </form>
+        <div className="flex flex-col gap-2">
+          <Label>Links</Label>
+          {fields.map((field, index) => (
+            <div key={field.id} className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <div className="flex items-center gap-2">
+                <select
+                  className={`${selectClassName} flex-1 sm:w-auto sm:flex-none`}
+                  {...register(`links.${index}.platform` as const)}
+                >
+                  {LINK_PLATFORMS.map((platform) => (
+                    <option key={platform.id} value={platform.id}>
+                      {platform.label}
+                    </option>
+                  ))}
+                </select>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Remover link"
+                  className="shrink-0 sm:hidden"
+                  onClick={() => remove(index)}
+                >
+                  <Trash2 className="size-4" />
+                </Button>
+              </div>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="url"
+                  placeholder="https://..."
+                  aria-invalid={!!errors.links?.[index]?.url}
+                  {...register(`links.${index}.url` as const)}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Remover link"
+                  className="hidden shrink-0 sm:inline-flex"
+                  onClick={() => remove(index)}
+                >
+                  <Trash2 className="size-4" />
+                </Button>
+              </div>
+            </div>
+          ))}
+          {errors.links && typeof errors.links.message === "string" && (
+            <p className="text-sm text-destructive">{errors.links.message}</p>
+          )}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="self-start"
+            onClick={() => append({ platform: "spotify", url: "" })}
+          >
+            <Plus className="size-4" /> Adicionar link
+          </Button>
+        </div>
+
+        <Button type="submit" disabled={isSubmitting} className="self-start">
+          {isSubmitting ? "Salvando..." : "Salvar alterações"}
+        </Button>
+      </form>
+
+      <div className="mt-8 hidden lg:sticky lg:top-20 lg:mt-0 lg:block">
+        <p className="mb-2 text-xs font-medium text-muted-foreground">
+          Prévia ao vivo
+        </p>
+        <ProfileCard
+          fullName={fullName || "Seu nome"}
+          username={username || "seu_usuario"}
+          bio={bio}
+          avatarUrl={avatarUrl}
+          backgroundStyle={backgroundStyle}
+          accentColor={accentColor}
+          buttonStyle={buttonStyle}
+          backgroundImageUrl={backgroundImageUrl}
+          topArtist={topArtist}
+          topTrack={topTrack}
+          links={(watchedLinks ?? []).map((link, index) => ({
+            id: String(index),
+            platform: link.platform,
+            url: link.url,
+          }))}
+        />
+      </div>
+    </div>
   );
 }

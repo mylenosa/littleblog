@@ -23,7 +23,7 @@ export type ProfileLinkInput = z.infer<typeof profileLinkSchema>;
 
 export const profileSchema = z.object({
   fullName: z.string().trim().min(2, "Informe seu nome."),
-  bio: z.string().trim().max(280, "Máximo de 280 caracteres.").optional(),
+  bio: z.string().trim().max(500, "Máximo de 500 caracteres.").optional(),
   avatarUrl: z
     .union([
       z.string().trim().url("Informe uma URL válida."),
@@ -60,6 +60,8 @@ export const profileSchema = z.object({
     .regex(/^#[0-9a-fA-F]{6}$/, "Escolha uma cor válida."),
   buttonStyle: z.enum(["bevel", "glossy", "grunge"]),
   backgroundImageUrl: urlOrEmpty,
+  topArtist: z.string().trim().max(80, "Máximo de 80 caracteres.").optional(),
+  topTrack: z.string().trim().max(80, "Máximo de 80 caracteres.").optional(),
   links: z.array(profileLinkSchema).max(12, "No máximo 12 links."),
 });
 

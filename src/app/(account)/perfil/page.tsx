@@ -19,7 +19,7 @@ export default async function PerfilPage() {
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "full_name, bio, avatar_url, username, is_public, background_style, accent_color, button_style, background_image_url"
+      "full_name, bio, avatar_url, username, is_public, background_style, accent_color, button_style, background_image_url, top_artist, top_track"
     )
     .eq("id", user!.id)
     .single();
@@ -45,6 +45,8 @@ export default async function PerfilPage() {
           accentColor: profile?.accent_color ?? "#3b82f6",
           buttonStyle: (profile?.button_style ?? "bevel") as ButtonStyle,
           backgroundImageUrl: profile?.background_image_url ?? "",
+          topArtist: profile?.top_artist ?? "",
+          topTrack: profile?.top_track ?? "",
           links: (links ?? []).map((link) => ({
             platform: link.platform as LinkPlatform,
             url: link.url,

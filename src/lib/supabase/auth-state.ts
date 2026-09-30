@@ -6,6 +6,7 @@ export type AuthState = {
     fullName: string | null;
     isEditor: boolean;
     avatarUrl: string | null;
+    username: string | null;
   } | null;
 };
 
@@ -19,7 +20,7 @@ export async function getAuthState(): Promise<AuthState> {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, is_editor, avatar_url")
+    .select("full_name, is_editor, avatar_url, username")
     .eq("id", user.id)
     .single();
 
@@ -30,6 +31,7 @@ export async function getAuthState(): Promise<AuthState> {
           fullName: profile.full_name,
           isEditor: profile.is_editor,
           avatarUrl: profile.avatar_url,
+          username: profile.username,
         }
       : null,
   };

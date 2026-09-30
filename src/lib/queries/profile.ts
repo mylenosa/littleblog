@@ -19,6 +19,8 @@ export type PublicProfile = {
   accentColor: string;
   buttonStyle: ButtonStyle;
   backgroundImageUrl: string | null;
+  topArtist: string | null;
+  topTrack: string | null;
   viewCount: number;
   updatedAt: string;
   links: PublicProfileLink[];
@@ -32,7 +34,7 @@ export async function getPublicProfileByUsername(
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "id, username, full_name, bio, avatar_url, is_public, background_style, accent_color, button_style, background_image_url, profile_view_count, updated_at"
+      "id, username, full_name, bio, avatar_url, is_public, background_style, accent_color, button_style, background_image_url, top_artist, top_track, profile_view_count, updated_at"
     )
     .eq("username", username.toLowerCase())
     .maybeSingle();
@@ -56,6 +58,8 @@ export async function getPublicProfileByUsername(
     accentColor: profile.accent_color,
     buttonStyle: profile.button_style as ButtonStyle,
     backgroundImageUrl: profile.background_image_url,
+    topArtist: profile.top_artist,
+    topTrack: profile.top_track,
     viewCount: profile.profile_view_count,
     updatedAt: profile.updated_at,
     links: (links ?? []) as PublicProfileLink[],

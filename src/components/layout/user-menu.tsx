@@ -13,15 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { signOut } from "@/lib/actions/auth";
 import type { AuthState } from "@/lib/supabase/auth-state";
-
-function initials(name: string) {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
-}
+import { initials } from "@/lib/initials";
 
 export function UserMenu({ user, profile }: AuthState) {
   if (!user) {
@@ -74,7 +66,11 @@ export function UserMenu({ user, profile }: AuthState) {
           {displayName}
         </div>
         <DropdownMenuSeparator />
-        <DropdownMenuItem render={<Link href="/perfil" />}>
+        <DropdownMenuItem
+          render={
+            <Link href={profile?.username ? `/${profile.username}` : "/perfil"} />
+          }
+        >
           <User /> Perfil
         </DropdownMenuItem>
         <DropdownMenuItem render={<Link href="/favoritos" />}>

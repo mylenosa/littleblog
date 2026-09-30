@@ -51,6 +51,8 @@ export async function updateProfile(
       accent_color: parsed.data.accentColor,
       button_style: parsed.data.buttonStyle,
       background_image_url: parsed.data.backgroundImageUrl || null,
+      top_artist: parsed.data.topArtist || null,
+      top_track: parsed.data.topTrack || null,
     })
     .eq("id", user.id);
 
